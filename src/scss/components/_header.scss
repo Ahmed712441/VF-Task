@@ -1,3 +1,5 @@
+@use "../base/variables" as *;
+
 .site-header {
   padding: $spacing-xl 0 $spacing-md 0;
   .header-content {

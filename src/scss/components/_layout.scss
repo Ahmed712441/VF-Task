@@ -1,3 +1,5 @@
+@use "../base/variables" as *;
+
 .app-container {
   min-height: 100vh;
   padding: $spacing-lg 0;

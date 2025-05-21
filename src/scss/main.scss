@@ -1,12 +1,11 @@
 // Base imports
-@import 'base/variables';
-@import 'base/reset';
-@import 'base/typography';
-@import 'base/utilities';
+@use 'base/reset';
+@use 'base/typography';
+@use 'base/utilities';
 
 // Component imports
-@import 'components/layout';
-@import 'components/header';
-@import 'components/search';
-@import 'components/crypto-list';
-@import 'components/chart';
+@use 'components/layout';
+@use 'components/header';
+@use 'components/search';
+@use 'components/crypto-list';
+@use 'components/chart';

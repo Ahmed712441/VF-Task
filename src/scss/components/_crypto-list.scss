@@ -1,3 +1,5 @@
+@use "../base/variables" as *;
+
 .crypto-table {
   width: 100%;
   border-collapse: collapse; // cells in the table share same borders
