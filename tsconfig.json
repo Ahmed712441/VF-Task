@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "strict": true,
+    "sourceMap": true,
+    "outDir": "./dist/js",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "typeRoots": ["./node_modules/@types"],
+    "lib": ["DOM", "DOM.Iterable", "ESNext"]
+  },
+  "include": ["src/ts/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

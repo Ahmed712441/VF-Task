@@ -1,0 +1,28 @@
+.search-container {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  
+  @media (max-width: $breakpoint-md) {
+    width: 100%;
+  }
+}
+
+.search-input {
+  width: 100%;
+  padding: $spacing-sm $spacing-md;
+  border: 1px solid $color-border;
+  border-radius: $border-radius-lg;
+  font-size: $font-size-base;
+  transition: $transition-base;
+  
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.2);
+  }
+  
+  &::placeholder {
+    color: $color-text-light; // need to be drakened
+  }
+}

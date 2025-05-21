@@ -1,0 +1,22 @@
+.app-container {
+  min-height: 100vh;
+  padding: $spacing-lg 0;
+  
+  @media (min-width: $breakpoint-md) {
+    padding: $spacing-xl 0;
+  }
+}
+
+.dashboard {
+  background-color: $color-background;
+  overflow: hidden;
+  margin-top: $spacing-lg;
+}
+
+.dashboard-content {
+  padding: $spacing-md;
+  
+  @media (min-width: $breakpoint-md) {
+    padding: $spacing-lg;
+  }
+}

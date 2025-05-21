@@ -1,0 +1,33 @@
+h1 {
+  font-size: $font-size-xl;
+  margin-bottom: $spacing-md;
+}
+
+h2 {
+  font-size: $font-size-lg;
+  margin-bottom: $spacing-sm;
+}
+
+p {
+  margin-bottom: $spacing-md;
+}
+
+.text-success {
+  color: $color-success;
+}
+
+.text-danger {
+  color: $color-danger;
+}
+
+.text-sm {
+  font-size: $font-size-sm;
+}
+
+.text-lg {
+  font-size: $font-size-lg;
+}
+
+.text-xl {
+  font-size: $font-size-xl;
+}

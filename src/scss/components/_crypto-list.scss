@@ -1,0 +1,139 @@
+.crypto-table {
+  width: 100%;
+  border-collapse: collapse; // cells in the table share same borders
+  
+  th, td {
+    padding: $spacing-md;
+    text-align: center;
+    margin: auto;
+    
+    @media (max-width: $breakpoint-md) {
+      padding: $spacing-sm;
+    }
+  }
+  
+  thead{
+    tr {
+        height: fit-content;
+    }
+  }
+  
+  th {
+    font-weight: 600;
+    color: $color-text;
+    border-bottom: 2px solid $color-border;
+    border-top: 2px solid $color-border;
+    position: sticky;
+    top: 0;
+    background-color: $color-background;
+    z-index: 10;
+    text-align: center;
+  }
+  
+  td {
+    border-bottom: 1px solid $color-border;
+    vertical-align: middle;
+  }
+  
+  tr:hover {
+    background-color: rgba($color-primary, 0.05);
+  }
+  
+  // Responsive adjustments
+  @media (max-width: $breakpoint-sm) {
+    // On small screens, stack the data
+    thead {
+      display: none;
+    }
+    
+    tbody, tr, td {
+      display: block;
+      width: 100%;
+    }
+    
+    tr {
+      margin-bottom: $spacing-lg;
+      border: 1px solid $color-border;
+      border-radius: $border-radius-md;
+      padding: $spacing-sm;
+    }
+    
+    td {
+      text-align: right;
+      position: relative;
+      padding-left: 50%;
+      border-bottom: 1px solid $color-border;
+      min-height: 50px;
+      
+      &:before {
+        content: attr(data-label);
+        position: absolute;
+        transform: translate(0%, -50%);
+        top: 50%;
+        left: $spacing-sm;
+        font-weight: 600;
+        text-align: left;
+      }
+      
+      &:last-child {
+        border-bottom: none;
+        min-height: 30px;
+      }
+    }
+  }
+}
+
+.crypto-row {
+  transition: $transition-base;
+}
+
+.crypto-name-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-md;
+  
+  .crypto-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: $border-radius-full;
+  }
+  
+  .crypto-name {
+    font-weight: 600;
+  }
+  @media (max-width: $breakpoint-sm) {
+    justify-content: flex-end;
+  }
+}
+
+.price-value {
+  font-weight: 600;
+  color: $color-success;
+}
+
+.change-value {
+  font-weight: 600;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $border-radius-sm;
+  display: inline-block;
+  
+  &.positive {
+    color: $color-success;
+  }
+  
+  &.negative {
+    color: $color-danger;
+  }
+}
+
+.remove-button {
+  color: $color-text-light;
+  opacity: 0.6;
+  transition: $transition-base;
+  
+  &:hover {
+    opacity: 1;
+    color: $color-danger;
+  }
+}

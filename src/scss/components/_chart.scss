@@ -1,0 +1,28 @@
+.mini-chart {
+  width: 100px;
+  height: 40px;
+  
+  @media (min-width: $breakpoint-md) {
+    width: 120px;
+    height: 40px;
+  }
+  
+  .mini-chart-positive {
+    stroke: $color-success;
+  }
+  
+  .mini-chart-negative {
+    stroke: $color-danger;
+  }
+}
+
+.chart-container {
+  width: 100%;
+  height: 250px;
+  margin-top: $spacing-lg;
+  
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
