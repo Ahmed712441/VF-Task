@@ -1,0 +1,277 @@
+@use "../base/variables" as *;
+@use 'sass:color';
+
+// Fade in animation for new rows
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Fade out animation for removed rows
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+}
+
+// Update animation (subtle pulse)
+@keyframes updatePulse {
+  0% {
+    background-color: rgba($color-primary, 0.1);
+  }
+  50% {
+    background-color: rgba($color-primary, 0.2);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+// Loading spinner
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Bounce animation for icons
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40%, 43% {
+    transform: translate3d(0, -30px, 0);
+  }
+  70% {
+    transform: translate3d(0, -15px, 0);
+  }
+  90% {
+    transform: translate3d(0, -4px, 0);
+  }
+}
+
+// Component-specific animations
+.crypto-row {
+  animation: fadeIn 0.3s ease-out;
+  transition: $transition-base;
+  
+  &.updating {
+    animation: updatePulse 0.3s ease-in-out;
+  }
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: $shadow-sm;
+  }
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid $color-border;
+  border-radius: 50%;
+  border-top-color: $color-primary;
+  animation: spin 1s ease-in-out infinite;
+}
+
+.search-suggestions {
+  animation: slideDown 0.2s ease-out;
+  
+  .suggestion-item {
+    padding: $spacing-sm $spacing-md;
+    cursor: pointer;
+    transition: $transition-base;
+    display: flex;
+    align-items: center;
+    
+    &:hover,
+    &.selected {
+      background-color: rgba($color-primary, 0.1);
+    }
+    
+    &:first-child {
+      border-radius: $border-radius-sm $border-radius-sm 0 0;
+    }
+    
+    &:last-child {
+      border-radius: 0 0 $border-radius-sm $border-radius-sm;
+    }
+  }
+}
+
+.error-message {
+  animation: bounce 1s ease-in-out;
+  
+  i {
+    color: $color-danger;
+    font-size: 2rem;
+    margin-bottom: $spacing-md;
+  }
+  
+  .retry-button {
+    background: $color-primary;
+    color: white;
+    border: none;
+    padding: $spacing-sm $spacing-lg;
+    border-radius: $border-radius-sm;
+    cursor: pointer;
+    transition: $transition-base;
+    
+    &:hover {
+      background: color.scale($color-primary, $lightness: -10%);
+    }
+  }
+}
+
+.empty-message {
+  i {
+    font-size: 3rem;
+    color: $color-text-light;
+    margin-bottom: $spacing-md;
+  }
+}
+
+// Chart container animations
+.chart-container {
+  opacity: 0;
+  animation: fadeIn 0.5s ease-out 0.2s forwards;
+}
+
+// Mini chart hover effects
+.mini-chart {
+  transition: $transition-base;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+  
+  svg {
+    transition: $transition-base;
+  }
+  
+  &.mini-chart-positive {
+    color: $color-success;
+  }
+  
+  &.mini-chart-negative {
+    color: $color-danger;
+  }
+}
+
+// Price change animations
+.change-value {
+  transition: $transition-base;
+  
+  &.positive {
+    background-color: rgba($color-success, 0.1);
+    
+    &::before {
+      content: '↗';
+      margin-right: 4px;
+      font-size: 0.8em;
+    }
+  }
+  
+  &.negative {
+    background-color: rgba($color-danger, 0.1);
+    
+    &::before {
+      content: '↘';
+      margin-right: 4px;
+      font-size: 0.8em;
+    }
+  }
+}
+
+// Responsive improvements
+@media (max-width: $breakpoint-md) {
+  .crypto-row {
+    &:hover {
+      transform: none; // Disable hover effects on mobile
+    }
+  }
+  
+  .search-suggestions {
+    position: fixed !important;
+    top: auto !important;
+    left: $spacing-md !important;
+    right: $spacing-md !important;
+    bottom: $spacing-md !important;
+    border-radius: $border-radius-md;
+    max-height: 60vh;
+  }
+}
+
+// Focus indicators for accessibility
+.search-input:focus {
+  animation: none; // Prevent animation on focus for accessibility
+}
+
+button:focus,
+.suggestion-item:focus {
+  outline: 2px solid $color-primary;
+  outline-offset: 2px;
+}
+
+// Loading states
+.loading-row td {
+  text-align: center !important;
+  
+  .loading-spinner {
+    margin: 0 auto;
+  }
+}
+
+// Success/Error states
+.success-message {
+  background-color: rgba($color-success, 0.1);
+  color: $color-success;
+  padding: $spacing-md;
+  border-radius: $border-radius-md;
+  border: 1px solid rgba($color-success, 0.2);
+  margin-bottom: $spacing-lg;
+}
+
+.error-state {
+  background-color: rgba($color-danger, 0.1);
+  color: $color-danger;
+  padding: $spacing-lg;
+  border-radius: $border-radius-md;
+  border: 1px solid rgba($color-danger, 0.2);
+  text-align: center;
+}
+
+// Dark mode support (optional)
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #1f2937;
+    --color-text: #f9fafb;
+    --color-text-light: #9ca3af;
+    --color-border: #374151;
+  }
+  
+  .dashboard {
+    background-color: #111827;
+    color: #f9fafb;
+  }
+  
+  .search-suggestions {
+    background-color: #1f2937;
+    border-color: #374151;
+  }
+}

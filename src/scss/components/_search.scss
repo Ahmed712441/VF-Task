@@ -2,11 +2,14 @@
 
 .search-container {
   position: relative;
-  width: 100%;
-  max-width: 600px;
+  width: 60%;
+  min-width: 340px;
   
-  @media (max-width: $breakpoint-md) {
+  
+  @media (max-width: $breakpoint-sm) {
     width: 100%;
+    max-width: 340px;
+    min-width: 0;
   }
 }
 

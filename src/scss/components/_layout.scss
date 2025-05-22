@@ -16,9 +16,9 @@
 }
 
 .dashboard-content {
-  padding: $spacing-md;
+  padding: $spacing-lg;
   
-  @media (min-width: $breakpoint-md) {
-    padding: $spacing-lg;
+  @media (max-width: $breakpoint-md) {
+    padding: 0;
   }
 }

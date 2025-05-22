@@ -3,6 +3,9 @@
 .mini-chart {
   width: 100px;
   height: 40px;
+  display: flex;
+  align-items: center;
+  justify-self: center;
   
   @media (min-width: $breakpoint-md) {
     width: 120px;
