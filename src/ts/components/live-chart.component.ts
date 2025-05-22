@@ -6,6 +6,7 @@ import {
   LineElement,
   LineController,
   Title,
+  TimeScale,
   Tooltip,
   Legend,
   Filler,
@@ -15,11 +16,15 @@ import {
 } from 'chart.js';
 import { CryptoMarketData } from '../models/crypto.model';
 import { eventBus } from '../utils/event-bus';
+import { LiveChartData } from '../models/live-chart.model';
+import { ChartUtils } from '../utils/chart';
+import 'chartjs-adapter-date-fns';
 
 // Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
+  TimeScale,
   PointElement,
   LineElement,
   LineController,
@@ -32,7 +37,7 @@ ChartJS.register(
 export class LiveChartComponent {
   private canvas: HTMLCanvasElement;
   private chart!: ChartJS;
-  private selectedCrypto: CryptoMarketData | null = null;
+  private selectedCrypto: LiveChartData | null = null;
 
   constructor(canvasSelector: string) {
     const canvas = document.querySelector(canvasSelector);
@@ -66,8 +71,8 @@ export class LiveChartComponent {
    * Setup event listeners
    */
   private setupEventListeners(): void {
-    eventBus.subscribe('crypto:select', (data) => {
-      this.selectCrypto(data.data);
+    eventBus.subscribe('crypto:live-data', (data) => {
+      this.selectCrypto(data);
     });
 
     eventBus.subscribe('cryptoList:rendered', (data) => {
@@ -105,13 +110,28 @@ export class LiveChartComponent {
       maintainAspectRatio: false,
       scales: {
         x: {
+          type: 'time', // Enable time scale
           display: true,
           title: {
             display: true,
-            text: 'Time (7 days)'
+            text: 'Time (24 hours)'
           },
           grid: {
             color: 'rgba(0, 0, 0, 0.1)'
+          },
+          time: {
+            // For 24-hour crypto data, hour unit usually works well
+            unit: 'hour',
+            displayFormats: {
+              hour: 'HH:mm', // Show time as 14:30, 15:00, etc.
+              day: 'MMM d'   // Fallback for longer periods
+            },
+            tooltipFormat: 'MMM d, HH:mm' // Detailed format for tooltips
+          },
+          ticks: {
+            maxTicksLimit: 8, // Prevent overcrowding
+            autoSkip: true,
+            source: 'auto'
           }
         },
         y: {
@@ -139,8 +159,12 @@ export class LiveChartComponent {
           mode: 'index',
           intersect: false,
           callbacks: {
+            title: function(context: TooltipItem<'line'>[]) {
+              // Format the timestamp in tooltip title
+              return new Date(context[0].parsed.x).toLocaleString();
+            },
             label: function(context: TooltipItem<'line'>) {
-              return `${context.dataset.label}: $${Number(context.raw).toLocaleString()}`;
+              return `${context.dataset.label}: $${Number(context.parsed.y).toLocaleString()}`;
             }
           }
         }
@@ -156,7 +180,7 @@ export class LiveChartComponent {
   /**
    * Select a cryptocurrency for the chart
    */
-  selectCrypto(crypto: CryptoMarketData): void {
+  selectCrypto(crypto: LiveChartData): void {
     this.selectedCrypto = crypto;
     this.updateChart();
   }
@@ -167,18 +191,28 @@ export class LiveChartComponent {
   private updateChart(): void {
     if (!this.chart || !this.selectedCrypto) return;
 
-    const sparklineData = this.selectedCrypto.sparkline_in_7d.price;
-    const labels = this.generateTimeLabels(sparklineData.length);
-    console.log('labels',labels)
+    const sparklineData = this.selectedCrypto.historical_data.prices.map(([timestamp, price]) => {
+      return {
+        x: timestamp,
+        y: price
+      };
+    });
+  
+    // Use one of the label generation methods
+    // const labels = ChartUtils.generateSmartLabelsFromTimestamps(this.selectedCrypto.historical_data.prices);
+    const labels = this.selectedCrypto.historical_data.prices.map(([timestamp,price]) => timestamp)
+
     // Determine color based on trend
-    const isPositive = this.selectedCrypto.price_change_percentage_24h >= 0;
+    const firstPrice = this.selectedCrypto.historical_data.prices[0]?.[1] || 0;
+    const lastPrice = this.selectedCrypto.historical_data.prices[this.selectedCrypto.historical_data.prices.length - 1]?.[1] || 0;
+    const isPositive = lastPrice >= firstPrice;
     const borderColor = isPositive ? '#22c55e' : '#ef4444';
     const backgroundColor = isPositive ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)';
-
+    
     this.chart.data = {
-      labels: labels,
+      // labels:labels,
       datasets: [{
-        label: `${this.selectedCrypto.name} (${this.selectedCrypto.symbol.toUpperCase()})`,
+        label: `${this.selectedCrypto.data.name} (${this.selectedCrypto.data.symbol.toUpperCase()})`,
         data: sparklineData,
         borderColor: borderColor,
         backgroundColor: backgroundColor,
@@ -194,40 +228,6 @@ export class LiveChartComponent {
     };
 
     this.chart.update('none'); // No animation for real-time updates
-  }
-
-  /**
-   * Generate time labels for chart
-   */
-  private generateTimeLabels(length: number): string[] {
-    const labels: string[] = [];
-    const now = new Date();
-    const intervalHours = (7 * 24) / length; // 7 days divided by number of data points
-
-    for (let i = 0; i < length; i++) {
-      const time = new Date(now.getTime() - (length - 1 - i) * intervalHours * 60 * 60 * 1000);
-      labels.push(time.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric',
-        hour: '2-digit'
-      }));
-    }
-
-    return labels;
-  }
-
-  /**
-   * Update chart with new data (for real-time updates)
-   */
-  update(cryptos: CryptoMarketData[]): void {
-    if (!this.selectedCrypto) return;
-
-    // Find updated data for selected crypto
-    const updatedCrypto = cryptos.find(c => c.id === this.selectedCrypto!.id);
-    if (updatedCrypto) {
-      this.selectedCrypto = updatedCrypto;
-      this.updateChart();
-    }
   }
 
   /**

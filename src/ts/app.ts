@@ -11,6 +11,7 @@ export class CryptoDashboardApp {
   private searchComponent!: SearchComponent;
   private liveChartComponent!: LiveChartComponent;
   private currentCryptos: CryptoMarketData[] = [];
+  private selectedCrypto: CryptoMarketData | null = null;
   private isSearchMode: boolean = false;
 
   constructor(apiKey?: string) {
@@ -49,6 +50,9 @@ export class CryptoDashboardApp {
     // Auto-select first crypto for chart
     eventBus.subscribe('cryptoList:rendered', this.handleListRendered.bind(this));
 
+    // Live chart events
+    eventBus.subscribe('crypto:select', this.startRealTimeUpdates.bind(this));
+
     console.log('Event listeners setup complete');
   }
 
@@ -62,9 +66,6 @@ export class CryptoDashboardApp {
       // Load initial data
       await this.loadInitialData();
       
-      // Start real-time updates
-      this.startRealTimeUpdates();
-
       this.removeGlobalLoading();
       
       console.log('Application initialized successfully');
@@ -87,17 +88,20 @@ export class CryptoDashboardApp {
     }
   }
 
-  /**
-   * Start real-time updates
-   */
-  private startRealTimeUpdates(): void {
-    this.cryptoService.subscribeToPriceUpdates((updatedData: CryptoMarketData[]) => {
-      if (!this.isSearchMode) {
-        this.currentCryptos = updatedData;
-        this.cryptoListComponent.update(updatedData);
-        this.liveChartComponent.update(updatedData);
+  private startRealTimeUpdates(data:{id:string,data:CryptoMarketData}): void {
+    if(this.selectedCrypto?.id !== data.id){
+      if(this.selectedCrypto) {
+        this.cryptoService.stopRealTimeUpdates(this.selectedCrypto.id);
       }
-    });
+      this.selectedCrypto = data.data;
+      this.cryptoService.subscribeToPriceUpdates((historicalData,id) => {
+        eventBus.publish('crypto:live-data', {
+          data:data.data,
+          id:data.id,
+          historical_data: historicalData
+        })
+      },data.id)
+    }
   }
 
   /**

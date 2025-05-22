@@ -27,14 +27,7 @@ export class CryptoListComponent {
    * Setup event listeners
    */
   private setupEventListeners(): void {
-    eventBus.subscribe('crypto:remove', (data) => {
-      this.removeCrypto(data.id);
-    });
-
-    eventBus.subscribe('crypto:select', (data) => {
-      console.log('Crypto selected:', data);
-      // Handle row selection if needed
-    });
+    eventBus.subscribe('crypto:remove', this.removeCrypto.bind(this));
   }
 
   /**
@@ -79,7 +72,7 @@ export class CryptoListComponent {
     const currentIds = new Set(cryptos.map(c => c.id));
     this.cryptoRows.forEach((row, id) => {
       if (!currentIds.has(id)) {
-        this.removeCrypto(id);
+        this.removeCrypto({id});
       }
     });
   }
@@ -87,7 +80,11 @@ export class CryptoListComponent {
   /**
    * Remove a cryptocurrency from the list
    */
-  private removeCrypto(cryptoId: string): void {
+  private removeCrypto(data: {
+    id: string;
+    name?: string;
+  }): void {
+    const cryptoId = data.id;
     const rowComponent = this.cryptoRows.get(cryptoId);
     if (rowComponent) {
       // Add removal animation
