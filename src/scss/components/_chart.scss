@@ -11,6 +11,11 @@
     width: 120px;
     height: 40px;
   }
+
+  @media (max-width: $breakpoint-sm) {
+    width: 100%;
+    justify-content: flex-end;
+  }
   
   .mini-chart-positive {
     stroke: $color-success;
@@ -30,4 +35,9 @@
     width: 100% !important;
     height: 100% !important;
   }
+}
+
+.no-chart {
+  width: 100%;
+  text-align: center;
 }
