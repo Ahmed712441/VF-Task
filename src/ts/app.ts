@@ -127,7 +127,7 @@ export class CryptoDashboardApp {
     this.currentTableSubscription = this.cryptoService
       .getRealtimeTableUpdates(this.currentCryptos.map((crypto) => crypto.id))
       .subscribe((newList) => {
-        this.handleTableUpdate(newList, false);
+        this.handleTableUpdate(newList, false, true);
       });
   }
 
@@ -137,12 +137,13 @@ export class CryptoDashboardApp {
   private handleTableUpdate(
     newList: CryptoMarketData[],
     rerender: boolean = false,
+    animating: boolean = false,
   ): void {
     this.currentCryptos = newList;
     if (rerender) {
       this.cryptoListComponent.render(this.currentCryptos);
     } else {
-      this.cryptoListComponent.update(this.currentCryptos);
+      this.cryptoListComponent.update(this.currentCryptos,animating);
     }
   }
 
@@ -156,7 +157,7 @@ export class CryptoDashboardApp {
       try {
         this.cryptoListComponent.showLoading();
         const currentCryptos = await this.cryptoService.getTopCryptos(10);
-        this.handleTableUpdate(currentCryptos, false);
+        this.handleTableUpdate(currentCryptos,false,false);
         this.startRealtimeTableUpdates();
       } catch (error) {
         console.error("Failed to reload top cryptos:", error);
@@ -175,7 +176,7 @@ export class CryptoDashboardApp {
       this.cryptoListComponent.showLoading();
       const results = await this.cryptoService.getSearchResults(data.query);
       if (results.length > 0) {
-        this.handleTableUpdate(results, false);
+        this.handleTableUpdate(results, false,false);
         this.startRealtimeTableUpdates();
       } else {
         this.cryptoListComponent.showEmpty(

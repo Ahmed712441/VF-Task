@@ -5,7 +5,7 @@ import {
   EventMap,
 } from "../models/event-bus.types";
 
-export class EventBus<TEvents extends EventMap = EventMap>
+class EventBus<TEvents extends EventMap = EventMap>
   implements EventBusInterface<TEvents>
 {
   private events: {

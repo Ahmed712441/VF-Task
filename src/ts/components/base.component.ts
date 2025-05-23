@@ -1,4 +1,4 @@
-export class SelectorComponent {
+export abstract class SelectorComponent {
   protected unsubscribeEvents: Array<() => void> = [];
   protected container: HTMLElement;
 

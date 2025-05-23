@@ -142,13 +142,13 @@ export class CryptoRowComponent {
   /**
    * Update the row with new data
    */
-  update(newData: CryptoMarketData): void {
+  update(newData: CryptoMarketData,animating:boolean = false): void {
     const hasChanged = this.hasDataChanged(newData);
 
     if (hasChanged) {
       this.data = newData;
       // Add update animation class
-      this.element.classList.add("updating");
+      if (animating) this.element.classList.add("updating");
 
       // Update the content
       this.element.innerHTML = this.getRowHTML();
@@ -157,9 +157,11 @@ export class CryptoRowComponent {
       this.attachEventListeners();
 
       // Remove animation class after animation completes
-      setTimeout(() => {
-        this.element.classList.remove("updating");
-      }, 300);
+      if(animating){
+        setTimeout(() => {
+          this.element.classList.remove("updating");
+        }, 300);
+      }
     }
   }
 
