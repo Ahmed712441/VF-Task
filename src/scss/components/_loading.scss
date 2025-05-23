@@ -1,3 +1,5 @@
+@use "../base/variables" as *;
+
 .loading-cell {
   position: relative;
   height: 1.5rem;
@@ -12,6 +14,12 @@
     width: 50%;
     height: 40%;
     animation: shimmer 1.5s ease-in-out infinite;
+  }
+  // Responsive adjustments
+  @media (max-width: $breakpoint-sm) {
+    &::after {
+      left: 50%;
+    }
   }
 }
 

@@ -127,24 +127,20 @@ export class CryptoListComponent extends SelectorComponent {
   /**
    * Show loading state
    */
-  private showLoading(): void {
+  showLoading(): void {
     if (this.isLoading) return;
 
     this.isLoading = true;
-    this.tableBody.innerHTML = `
-      <tr class="loading-row">
-        <td colspan="5" style="text-align: center; padding: 2rem;">
-          <div class="loading-spinner">Loading...</div>
-        </td>
-      </tr>
-    `;
+    this.cryptoRows.forEach((row) => row.startLoading());
   }
 
   /**
    * Hide loading state
    */
-  private hideLoading(): void {
+  hideLoading(): void {
+    if (!this.isLoading) return;
     this.isLoading = false;
+    this.cryptoRows.forEach((row) => row.endLoading());
   }
 
   /**

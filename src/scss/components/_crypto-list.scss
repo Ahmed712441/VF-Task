@@ -57,10 +57,13 @@
       margin-bottom: $spacing-lg;
       border: 1px solid $color-border;
       border-radius: $border-radius-md;
-      padding: $spacing-sm;
+      padding: $spacing-sm $spacing-sm 0 $spacing-sm;
     }
     
     td {
+      display: flex;
+      align-items: center;
+      justify-content: end;
       text-align: right;
       position: relative;
       padding-left: 50%;
@@ -79,7 +82,6 @@
       
       &:last-child {
         border-bottom: none;
-        min-height: 30px;
       }
     }
   }

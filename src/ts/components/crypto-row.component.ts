@@ -6,6 +6,7 @@ import { eventBus } from "../utils/event-bus";
 export class CryptoRowComponent {
   private data: CryptoMarketData;
   private element: HTMLTableRowElement;
+  private isloading: boolean = false;
 
   constructor(data: CryptoMarketData) {
     this.data = data;
@@ -34,12 +35,12 @@ export class CryptoRowComponent {
       this.data.price_change_percentage_24h >= 0 ? "positive" : "negative";
     const formattedPrice = FormatUtils.formatPrice(this.data.current_price);
     const formattedChange = FormatUtils.formatPercentage(
-      this.data.price_change_percentage_24h,
+      this.data.price_change_percentage_24h
     );
     const miniChart = ChartUtils.createMiniChart(
-      this.data.sparkline_in_7d.price,
+      this.data.sparkline_in_7d.price
     );
-    
+
     return `
       <td data-label="Name">
         <div class="crypto-name-cell">
@@ -70,6 +71,33 @@ export class CryptoRowComponent {
           <i class="fas fa-times"></i>
         </button>
       </td>
+    `;
+  }
+
+  private getLoadingHTML(): string {
+    return `<tr>
+      <td class="loading-cell">
+        <div class="crypto-name-cell">
+          <div>
+            <div class="crypto-name"></div>
+          </div>
+        </div>
+      </td>
+      <td class="price-cell loading-cell" data-label="Price">
+        <span class="price-value"></span>
+      </td>
+      <td class="change-cell loading-cell" data-label="Change">
+        <span class="change-value"></span>
+      </td>
+      <td class="chart-cell loading-cell" data-label="Chart (7d)">
+        <div class="mini-chart">
+        </div>
+      </td>
+      <td class="loading-cell" data-label="Actions">
+        <button class="remove-btn" data-crypto="">
+        </button>
+      </td>
+    </tr>
     `;
   }
 
@@ -116,7 +144,6 @@ export class CryptoRowComponent {
    */
   update(newData: CryptoMarketData): void {
     const hasChanged = this.hasDataChanged(newData);
-    
 
     if (hasChanged) {
       this.data = newData;
@@ -134,6 +161,18 @@ export class CryptoRowComponent {
         this.element.classList.remove("updating");
       }, 300);
     }
+  }
+
+  startLoading(): void {
+    if (this.isloading) return;
+    this.element.innerHTML = this.getLoadingHTML();
+    this.isloading = true;
+  }
+
+  endLoading(): void {
+    if (!this.isloading) return;
+    this.element.innerHTML = this.getRowHTML();
+    this.isloading = false;
   }
 
   /**

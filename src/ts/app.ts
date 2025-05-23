@@ -154,11 +154,14 @@ export class CryptoDashboardApp {
       this.isSearchMode = false;
       // Return to top cryptos
       try {
+        this.cryptoListComponent.showLoading();
         const currentCryptos = await this.cryptoService.getTopCryptos(10);
         this.handleTableUpdate(currentCryptos,false);
         this.startRealtimeTableUpdates();
       } catch (error) {
         console.error("Failed to reload top cryptos:", error);
+      } finally {
+        this.cryptoListComponent.hideLoading();
       }
     }
   }
@@ -169,6 +172,7 @@ export class CryptoDashboardApp {
   private async handleSearchSubmit(data: { query: string }): Promise<void> {
     try {
       this.isSearchMode = true;
+      this.cryptoListComponent.showLoading();
       const results = await this.cryptoService.getSearchResults(data.query);
       if (results.length > 0) {
         this.handleTableUpdate(results,false);
@@ -181,6 +185,8 @@ export class CryptoDashboardApp {
     } catch (error) {
       console.error("Search submit failed:", error);
       this.cryptoListComponent.showError("Search failed. Please try again.");
+    } finally {
+      this.cryptoListComponent.hideLoading();
     }
   }
 
