@@ -138,7 +138,7 @@ export class CryptoService {
   }
 
   private stopAllRealTimeUpdates(): void {
-    this.updateIntervals.forEach((intervalId, coinId) => {
+    this.updateIntervals.forEach((intervalId) => {
       clearInterval(intervalId);
     });
     this.updateCallbacks.clear();

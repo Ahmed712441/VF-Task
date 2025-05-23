@@ -14,11 +14,10 @@ import {
   ChartOptions,
   TooltipItem
 } from 'chart.js';
-import { CryptoMarketData } from '../models/crypto.model';
 import { eventBus } from '../utils/event-bus';
 import { LiveChartData } from '../models/live-chart.model';
-import { ChartUtils } from '../utils/chart';
 import 'chartjs-adapter-date-fns';
+import { SelectorComponent } from './base.component';
 
 // Register Chart.js components
 ChartJS.register(
@@ -34,17 +33,14 @@ ChartJS.register(
   Filler
 );
 
-export class LiveChartComponent {
+export class LiveChartComponent extends SelectorComponent {
   private canvas: HTMLCanvasElement;
   private chart!: ChartJS;
   private selectedCrypto: LiveChartData | null = null;
 
   constructor(canvasSelector: string) {
-    const canvas = document.querySelector(canvasSelector);
-    if (!canvas) {
-      throw new Error(`Canvas element not found: ${canvasSelector}`);
-    }
-    this.canvas = canvas as HTMLCanvasElement;
+    super(canvasSelector);
+    this.canvas = this.container as HTMLCanvasElement;
     this.setupEventListeners();
     this.initializeChart();
   }
@@ -71,16 +67,10 @@ export class LiveChartComponent {
    * Setup event listeners
    */
   private setupEventListeners(): void {
-    eventBus.subscribe('crypto:live-data', (data) => {
+    const unsubscribe = eventBus.subscribe('crypto:live-data', (data) => {
       this.selectCrypto(data);
-    });
-
-    eventBus.subscribe('cryptoList:rendered', (data) => {
-      // Auto-select first crypto if none selected
-      if (!this.selectedCrypto && data.count > 0) {
-        // Will be handled by the first crypto selection
-      }
-    });
+    })
+    this.unsubscribeEvents.push(unsubscribe);
   }
 
   /**
@@ -198,10 +188,6 @@ export class LiveChartComponent {
       };
     });
   
-    // Use one of the label generation methods
-    // const labels = ChartUtils.generateSmartLabelsFromTimestamps(this.selectedCrypto.historical_data.prices);
-    const labels = this.selectedCrypto.historical_data.prices.map(([timestamp,price]) => timestamp)
-
     // Determine color based on trend
     const firstPrice = this.selectedCrypto.historical_data.prices[0]?.[1] || 0;
     const lastPrice = this.selectedCrypto.historical_data.prices[this.selectedCrypto.historical_data.prices.length - 1]?.[1] || 0;
@@ -257,5 +243,6 @@ export class LiveChartComponent {
     if (this.chart) {
       this.chart.destroy();
     }
+    super.destroy();
   }
 }

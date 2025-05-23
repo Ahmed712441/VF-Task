@@ -1,19 +1,15 @@
 import { CryptoMarketData } from '../models/crypto.model';
 import { CryptoRowComponent } from './crypto-row.component';
 import { eventBus } from '../utils/event-bus';
+import { SelectorComponent } from './base.component';
 
-export class CryptoListComponent {
-  private container: HTMLElement;
+export class CryptoListComponent extends SelectorComponent {
   private tableBody: HTMLTableSectionElement;
   private cryptoRows: Map<string, CryptoRowComponent> = new Map();
   private isLoading: boolean = false;
 
   constructor(containerSelector: string) {
-    const container = document.querySelector(containerSelector);
-    if (!container) {
-      throw new Error(`Container element not found: ${containerSelector}`);
-    }
-    this.container = container as HTMLElement;
+    super(containerSelector);
     this.tableBody = this.container.querySelector('#cryptoTableBody') as HTMLTableSectionElement;
     
     if (!this.tableBody) {
@@ -27,7 +23,8 @@ export class CryptoListComponent {
    * Setup event listeners
    */
   private setupEventListeners(): void {
-    eventBus.subscribe('crypto:remove', this.removeCrypto.bind(this));
+    const unsubscribe = eventBus.subscribe('crypto:remove', this.removeCrypto.bind(this));
+    this.unsubscribeEvents.push(unsubscribe);
   }
 
   /**
@@ -203,6 +200,6 @@ export class CryptoListComponent {
    */
   destroy(): void {
     this.clear();
-    eventBus.unsubscribe('crypto:remove', this.removeCrypto);
+    super.destroy();
   }
 }

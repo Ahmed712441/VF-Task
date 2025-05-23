@@ -1,20 +1,30 @@
-export class EventBus {
-  private events: { [key: string]: Array<(data: any) => void> } = {};
+import { AppEvents, EventBusInterface, EventCallback, EventMap } from "../models/event-bus.types";
+
+export class EventBus<TEvents extends EventMap = EventMap> implements EventBusInterface<TEvents> {
+  
+  private events: { [key in keyof TEvents]?: Array<EventCallback<TEvents[key]>> } = {};
 
   /**
    * Subscribe to an event
    */
-  subscribe(event: string, callback: (data: any) => void): void {
+  subscribe<K extends keyof TEvents>(
+    event: K,
+    callback: EventCallback<TEvents[K]>
+  ): () => void {
     if (!this.events[event]) {
       this.events[event] = [];
     }
     this.events[event].push(callback);
+    return () => this.unsubscribe(event, callback);
   }
 
   /**
    * Unsubscribe from an event
    */
-  unsubscribe(event: string, callback: (data: any) => void): void {
+  unsubscribe<K extends keyof TEvents>(
+    event: K,
+    callback: EventCallback<TEvents[K]>
+  ): void {
     if (!this.events[event]) return;
     
     const index = this.events[event].indexOf(callback);
@@ -26,14 +36,17 @@ export class EventBus {
   /**
    * Publish an event
    */
-  publish(event: string, data: any): void {
+  publish<K extends keyof TEvents>(
+    event: K,
+    data: TEvents[K]
+  ): void {
     if (!this.events[event]) return;
     
     this.events[event].forEach(callback => {
       try {
         callback(data);
       } catch (error) {
-        console.error(`Error in event callback for ${event}:`, error);
+        console.error(`Error in event callback for ${event as string}:`, error);
       }
     });
   }
@@ -47,4 +60,4 @@ export class EventBus {
 }
 
 // Create global event bus instance
-export const eventBus = new EventBus();
+export const eventBus = new EventBus<AppEvents>();

@@ -33,7 +33,7 @@ export interface CryptoMarketData {
   atl: number;
   atl_change_percentage: number;
   atl_date: string;
-  roi?: any;
+  roi?: string;
   last_updated: string;
   sparkline_in_7d: SparklineData;
 }

@@ -1,3 +1,4 @@
+import { Primitives } from "../models/api.model";
 import { CryptoBasic, CryptoHistoricalData, CryptoMarketData } from "../models/crypto.model";
 import { HttpService } from "./http.service";
 
@@ -45,7 +46,7 @@ export class CoinGeckoService {
       priceChangePercentage = '24h'
     } = options;
 
-    const params: Record<string, any> = {
+    const params: Record<string, Primitives> = {
       vs_currency: vsCurrency,
       order,
       per_page: perPage,
@@ -171,7 +172,7 @@ export class CoinGeckoService {
       days = '1',
     } = options;
 
-    const params: Record<string, any> = {
+    const params: Record<string, Primitives> = {
       vs_currency: vsCurrency,
       days:days,
     };

@@ -1,35 +1,45 @@
-import { RequestConfig, ApiError } from "../models/api.model";
+import { RequestConfig, ApiError, Primitives } from "../models/api.model";
 
 export class HttpService {
   private readonly baseURL: string;
   private readonly apiKey: string;
-  private requestInterceptors: Array<(config: RequestConfig) => RequestConfig> = [];
-  private responseInterceptors: Array<(response: any) => any> = [];
+  private requestInterceptors: Array<(config: RequestConfig<unknown>) => RequestConfig<unknown>> = [];
+  private responseInterceptors: Array<(response: unknown) => unknown> = [];
 
   constructor(baseURL: string, apiKey?: string) {
     this.baseURL = baseURL.replace(/\/$/, ''); // Remove trailing slash
     this.apiKey = apiKey || '';
   }
 
-  // Add request interceptor
-  addRequestInterceptor(interceptor: (config: RequestConfig) => RequestConfig): void {
-    this.requestInterceptors.push(interceptor);
+  // Add request interceptor with proper typing
+  addRequestInterceptor<TData = unknown>(
+    interceptor: (config: RequestConfig<TData>) => RequestConfig<TData>
+  ): void {
+    this.requestInterceptors.push(interceptor as (config: RequestConfig<unknown>) => RequestConfig<unknown>);
   }
 
-  // Add response interceptor
-  addResponseInterceptor(interceptor: (response: any) => any): void {
-    this.responseInterceptors.push(interceptor);
+  // Add response interceptor with proper typing
+  addResponseInterceptor<TResponse = unknown>(
+    interceptor: (response: TResponse) => TResponse
+  ): void {
+    this.responseInterceptors.push(interceptor as (response: unknown) => unknown);
   }
 
-  private applyRequestInterceptors(config: RequestConfig): RequestConfig {
-    return this.requestInterceptors.reduce((acc, interceptor) => interceptor(acc), config);
+  private applyRequestInterceptors<TData>(config: RequestConfig<TData>): RequestConfig<TData> {
+    return this.requestInterceptors.reduce(
+      (acc, interceptor) => interceptor(acc) as RequestConfig<TData>, 
+      config as RequestConfig<unknown>
+    ) as RequestConfig<TData>;
   }
 
-  private applyResponseInterceptors(response: any): any {
-    return this.responseInterceptors.reduce((acc, interceptor) => interceptor(acc), response);
+  private applyResponseInterceptors<TResponse>(response: TResponse): TResponse {
+    return this.responseInterceptors.reduce(
+      (acc, interceptor) => interceptor(acc) as TResponse, 
+      response
+    );
   }
 
-  async request<T>(config: RequestConfig): Promise<T> {
+  async request<TResponse, TData = unknown>(config: RequestConfig<TData>): Promise<TResponse> {
     // Apply request interceptors
     const finalConfig = this.applyRequestInterceptors(config);
     
@@ -48,7 +58,7 @@ export class HttpService {
 
     // Add API key header if available
     if (this.apiKey) {
-      (fetchOptions.headers as any)['x-cg-demo-api-key'] = this.apiKey;
+      (fetchOptions.headers as Record<string, string>)['x-cg-demo-api-key'] = this.apiKey;
     }
 
     // Add body for POST/PUT requests
@@ -60,20 +70,25 @@ export class HttpService {
       const response = await fetch(urlWithParams, fetchOptions);
       
       if (!response.ok) {
-        throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+        const error: ApiError = {
+          message: `HTTP Error: ${response.status} ${response.statusText}`,
+          status: response.status,
+          code: 'HTTP_ERROR'
+        };
+        throw error;
       }
 
-      const data = await response.json();
+      const data: TResponse = await response.json();
       
       // Apply response interceptors
-      return this.applyResponseInterceptors(data);
+      return this.applyResponseInterceptors<TResponse>(data);
     } catch (error) {
       console.error('HTTP Request failed:', error);
       throw this.handleError(error);
     }
   }
 
-  private buildUrlWithParams(url: string, params?: Record<string, any>): string {
+  private buildUrlWithParams(url: string, params?: Record<string, Primitives>): string {
     if (!params) return url;
 
     const searchParams = new URLSearchParams();
@@ -87,7 +102,13 @@ export class HttpService {
     return queryString ? `${url}?${queryString}` : url;
   }
 
-  private handleError(error: any): ApiError {
+  private handleError(error: unknown): ApiError {
+    // If it's already an ApiError, return it
+    if (this.isApiError(error)) {
+      return error;
+    }
+
+    // If it's a standard Error
     if (error instanceof Error) {
       return {
         message: error.message,
@@ -101,9 +122,20 @@ export class HttpService {
     };
   }
 
-  // Convenience methods
-  async get<T>(url: string, params?: Record<string, any>, config?: Partial<RequestConfig>): Promise<T> {
-    return this.request<T>({
+  private isApiError(error: unknown): error is ApiError {
+    return typeof error === 'object' && 
+           error !== null && 
+           'message' in error && 
+           typeof (error as {message:unknown}).message === 'string';
+  }
+
+  // Convenience methods with improved typing
+  async get<TResponse>(
+    url: string, 
+    params?: Record<string, Primitives>, 
+    config?: Partial<Omit<RequestConfig<never>, 'method' | 'url' | 'params' | 'data'>>
+  ): Promise<TResponse> {
+    return this.request<TResponse, never>({
       method: 'GET',
       url,
       params,
@@ -111,8 +143,12 @@ export class HttpService {
     });
   }
 
-  async post<T>(url: string, data?: any, config?: Partial<RequestConfig>): Promise<T> {
-    return this.request<T>({
+  async post<TResponse, TData = unknown>(
+    url: string, 
+    data?: TData, 
+    config?: Partial<Omit<RequestConfig<TData>, 'method' | 'url' | 'data'>>
+  ): Promise<TResponse> {
+    return this.request<TResponse, TData>({
       method: 'POST',
       url,
       data,

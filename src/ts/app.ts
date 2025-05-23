@@ -2,7 +2,7 @@ import { CryptoService } from './services/crypto.service';
 import { CryptoListComponent } from './components/crypto-list.component';
 import { SearchComponent } from './components/search.component';
 import { LiveChartComponent } from './components/live-chart.component';
-import { CryptoMarketData, CryptoBasic } from './models/crypto.model';
+import { CryptoMarketData } from './models/crypto.model';
 import { eventBus } from './utils/event-bus';
 
 export class CryptoDashboardApp {
@@ -94,7 +94,7 @@ export class CryptoDashboardApp {
         this.cryptoService.stopRealTimeUpdates(this.selectedCrypto.id);
       }
       this.selectedCrypto = data.data;
-      this.cryptoService.subscribeToPriceUpdates((historicalData,id) => {
+      this.cryptoService.subscribeToPriceUpdates((historicalData) => {
         eventBus.publish('crypto:live-data', {
           data:data.data,
           id:data.id,
@@ -230,6 +230,12 @@ export class CryptoDashboardApp {
   }
 }
 
+declare global {
+    interface Window {
+      cryptoApp: CryptoDashboardApp;
+    }
+}
+
 // Initialize application when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
   try {
@@ -237,7 +243,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const app = new CryptoDashboardApp(apiKey);
     
     // Make app globally available for debugging
-    (window as any).cryptoApp = app;
+    window.cryptoApp = app;
     
     // Initialize the application
     await app.initialize();

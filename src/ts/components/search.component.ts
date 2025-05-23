@@ -1,16 +1,13 @@
-import { CryptoBasic } from '../models/crypto.model';
 import { eventBus } from '../utils/event-bus';
+import { SelectorComponent } from './base.component';
 
-export class SearchComponent {
+export class SearchComponent extends SelectorComponent {
   private inputElement: HTMLInputElement;
   private searchTimeout: number | null = null;
 
   constructor(inputSelector: string) {
-    const input = document.querySelector(inputSelector);
-    if (!input) {
-      throw new Error(`Search input element not found: ${inputSelector}`);
-    }
-    this.inputElement = input as HTMLInputElement;
+    super(inputSelector);
+    this.inputElement = this.container as HTMLInputElement;
     this.setupEventListeners();
   }
 
@@ -51,13 +48,14 @@ export class SearchComponent {
    */
   private handleKeyDown(e: KeyboardEvent): void {
     switch (e.key) {      
-      case 'Enter':
+      case 'Enter': {
         e.preventDefault();
         const query = this.inputElement.value.trim();
         if (query) {
-            eventBus.publish('search:submit', { query });
+          eventBus.publish('search:submit', { query });
         }
         break;
+      }
     }
   }
 
