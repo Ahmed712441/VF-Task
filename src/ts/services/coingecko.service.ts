@@ -130,7 +130,7 @@ export class CoinGeckoService {
    */
   async searchCryptos(
     query: string,
-    limit: number = 10,
+    limit: number = 70,
   ): Promise<CryptoBasic[]> {
     if (!query.trim()) {
       return [];

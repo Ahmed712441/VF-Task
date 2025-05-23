@@ -1,0 +1,33 @@
+.loading-cell {
+  position: relative;
+  height: 1.5rem;
+//   background: #eee;
+  border-radius: 4px;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: -50%;
+    width: 40px;
+    height: 80%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      #eee,
+      transparent
+    );
+    // margin: 20px;
+    animation: shimmer 1.2s infinite;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    left: -10%;
+  }
+  100% {
+    left: 100%;
+  }
+}

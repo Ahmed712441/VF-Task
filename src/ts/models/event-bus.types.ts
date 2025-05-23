@@ -32,4 +32,5 @@ export interface AppEvents extends EventMap {
   "search:query": { query: string };
   "search:clear": object;
   "search:submit": { query: string };
+  "cryptoList:back": object;
 }

@@ -168,10 +168,18 @@ export class CryptoListComponent extends SelectorComponent {
           <div class="empty-message">
             <i class="fas fa-search"></i>
             <p>${message}</p>
+            <button id="rstBtn" class="retry-button">Back</button>
           </div>
         </td>
       </tr>
     `;
+    const cryptoData = this.getAllData();
+    this.cryptoRows.forEach((row) => row.destroy()); // destroy as they are already dropped from HTML
+    const retryButton = this.tableBody.querySelector("#rstBtn");
+    retryButton?.addEventListener("click", () => {
+      this.tableBody.innerHTML = "";
+      this.render(cryptoData);
+    });
   }
 
   /**

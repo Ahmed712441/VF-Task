@@ -39,7 +39,7 @@ export class CryptoRowComponent {
     const miniChart = ChartUtils.createMiniChart(
       this.data.sparkline_in_7d.price,
     );
-    // <div class="crypto-symbol">${this.data.symbol.toUpperCase()}</div>
+    
     return `
       <td data-label="Name">
         <div class="crypto-name-cell">

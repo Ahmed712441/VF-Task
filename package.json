@@ -16,36 +16,32 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@eslint/js": "^9.27.0",
-    "@types/eslint__js": "^8.42.3",
-    "@typescript-eslint/eslint-plugin": "^6.19.0",
-    "@typescript-eslint/parser": "^6.19.0",
     "clean-webpack-plugin": "^4.0.0",
     "concurrently": "^8.2.2",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.8.1",
-    "eslint": "^9.27.0",
-    "eslint-config-prettier": "^10.1.5",
-    "eslint-plugin-prettier": "^5.4.0",
+    "eslint": "^8.51.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
     "globals": "^16.1.0",
     "html-webpack-plugin": "^5.5.3",
     "http-server": "^14.1.1",
     "mini-css-extract-plugin": "^2.7.6",
     "onchange": "^7.1.0",
-    "prettier": "^3.5.3",
+    "prettier": "^3.0.3",
     "rimraf": "^5.0.5",
     "sass": "^1.70.0",
     "sass-loader": "^13.0.0",
     "style-loader": "^3.3.3",
     "ts-loader": "^9.5.1",
     "typescript": "^5.3.3",
-    "typescript-eslint": "^8.32.1",
     "webpack": "^5.99.9",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.1"
   },
   "dependencies": {
     "chart.js": "^4.4.1",
-    "chartjs-adapter-date-fns": "^3.0.0"
+    "chartjs-adapter-date-fns": "^3.0.0",
+    "rxjs": "^7.8.2"
   }
 }

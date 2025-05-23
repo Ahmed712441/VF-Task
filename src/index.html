@@ -35,12 +35,37 @@
                   <th>Name</th>
                   <th>Price</th>
                   <th>Change</th>
-                  <th>Chart</th>
+                  <th>Chart (7 days)</th>
                   <th></th>
                   <!-- For remove buttons -->
                 </tr>
               </thead>
               <tbody id="cryptoTableBody">
+                <!-- Table rows will be dynamically generated here -->
+                <tr>
+                  <td class="loading-cell">
+                    <div class="crypto-name-cell">
+                      <div>
+                        <div class="crypto-name"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="price-cell loading-cell" data-label="Price">
+                    <span class="price-value"></span>
+                  </td>
+                  <td class="change-cell loading-cell" data-label="Change">
+                    <span class="change-value"></span>
+                  </td>
+                  <td class="chart-cell loading-cell" data-label="Chart">
+                    <div class="mini-chart">
+                    </div>
+                  </td>
+                  <td class="loading-cell" data-label="Actions">
+                    <button class="remove-btn" data-crypto="">
+                    </button>
+                  </td>
+                </tr>
+                <!-- More rows as needed -->
               </tbody>
             </table>
           </div>

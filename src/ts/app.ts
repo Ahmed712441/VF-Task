@@ -2,10 +2,12 @@ import { CryptoService } from "./services/crypto.service";
 import { CryptoListComponent } from "./components/crypto-list.component";
 import { SearchComponent } from "./components/search.component";
 import { LiveChartComponent } from "./components/live-chart.component";
-import { CryptoMarketData } from "./models/crypto.model";
+import { CryptoHistoricalData, CryptoMarketData } from "./models/crypto.model";
 import { eventBus } from "./utils/event-bus";
+import { Observable, Subscription } from "rxjs";
 
 export class CryptoDashboardApp {
+
   private cryptoService: CryptoService;
   private cryptoListComponent!: CryptoListComponent;
   private searchComponent!: SearchComponent;
@@ -13,6 +15,8 @@ export class CryptoDashboardApp {
   private currentCryptos: CryptoMarketData[] = [];
   private selectedCrypto: CryptoMarketData | null = null;
   private isSearchMode: boolean = false;
+  private currentChartSubscription: Subscription | null = null;
+  private currentTableSubscription: Subscription | null = null;
 
   constructor(apiKey?: string) {
     this.cryptoService = new CryptoService(apiKey);
@@ -47,17 +51,20 @@ export class CryptoDashboardApp {
     // Crypto list events
     eventBus.subscribe(
       "cryptoList:cryptoRemoved",
-      this.handleCryptoRemoved.bind(this),
+      this.handleCryptoRemoved.bind(this)
     );
 
     // Auto-select first crypto for chart
     eventBus.subscribe(
       "cryptoList:rendered",
-      this.handleListRendered.bind(this),
+      this.handleListRendered.bind(this)
     );
 
     // Live chart events
-    eventBus.subscribe("crypto:select", this.startRealTimeUpdates.bind(this));
+    eventBus.subscribe(
+      "crypto:select",
+      this.startRealtimeChartUpdates.bind(this)
+    );
 
     console.log("Event listeners setup complete");
   }
@@ -78,7 +85,7 @@ export class CryptoDashboardApp {
     } catch (error) {
       console.error("Failed to initialize application:", error);
       this.showErrorState(
-        "Failed to load cryptocurrency data. Please check your connection and try again.",
+        "Failed to load cryptocurrency data. Please check your connection and try again."
       );
     }
   }
@@ -96,25 +103,52 @@ export class CryptoDashboardApp {
     }
   }
 
-  private startRealTimeUpdates(data: {
+  private startRealtimeChartUpdates(data: {
     id: string;
     data: CryptoMarketData;
   }): void {
     if (this.selectedCrypto?.id !== data.id) {
-      if (this.selectedCrypto) {
-        this.cryptoService.stopRealTimeUpdates(this.selectedCrypto.id);
+      if (this.currentChartSubscription) {
+        this.currentChartSubscription.unsubscribe();
       }
       this.selectedCrypto = data.data;
-      this.cryptoService.subscribeToPriceUpdates((historicalData) => {
-        eventBus.publish("crypto:live-data", {
-          data: data.data,
-          id: data.id,
-          historical_data: historicalData,
+      this.currentChartSubscription = this.cryptoService
+        .getRealtimePriceUpdates(data.id)
+        .subscribe((historicalData) => {
+          eventBus.publish("crypto:live-data", {
+            data: data.data,
+            id: data.id,
+            historical_data: historicalData,
+          });
         });
-      }, data.id);
     }
   }
 
+  private startRealtimeTableUpdates() {
+    if (this.currentTableSubscription) {
+      this.currentTableSubscription.unsubscribe();
+    }
+    if(!this.currentCryptos.length) return
+    this.currentTableSubscription = this.cryptoService
+      .getRealtimeTableUpdates(this.currentCryptos.map((crypto) => crypto.id))
+      .subscribe((newList) => {
+        this.handleTableUpdate(newList);
+    });
+  }
+
+  /**
+   * Handle updating crypto data in the table
+   */
+  private handleTableUpdate(newList: CryptoMarketData[],rerender:boolean=false): void {
+    this.currentCryptos = newList;
+    if(rerender) {
+      this.cryptoListComponent.render(this.currentCryptos);
+    }else {
+      this.cryptoListComponent.update(this.currentCryptos);
+    }
+  }
+
+  
   /**
    * Handle search clear
    */
@@ -123,8 +157,8 @@ export class CryptoDashboardApp {
       this.isSearchMode = false;
       // Return to top cryptos
       try {
-        this.currentCryptos = await this.cryptoService.getTopCryptos(10);
-        this.cryptoListComponent.render(this.currentCryptos);
+        const currentCryptos = await this.cryptoService.getTopCryptos(10);
+        this.handleTableUpdate(currentCryptos,true);
       } catch (error) {
         console.error("Failed to reload top cryptos:", error);
       }
@@ -140,11 +174,10 @@ export class CryptoDashboardApp {
       const results = await this.cryptoService.getSearchResults(data.query);
 
       if (results.length > 0) {
-        this.currentCryptos = results;
-        this.cryptoListComponent.render(results);
+        this.handleTableUpdate(results);
       } else {
         this.cryptoListComponent.showEmpty(
-          `No results found for "${data.query}"`,
+          `No results found for "${data.query}"`
         );
       }
     } catch (error) {
@@ -159,13 +192,14 @@ export class CryptoDashboardApp {
   private handleCryptoRemoved(data: { id: string }): void {
     // Remove from current data
     this.currentCryptos = this.currentCryptos.filter(
-      (crypto) => crypto.id !== data.id,
+      (crypto) => crypto.id !== data.id
     );
 
     // If no cryptos left, reload top cryptos
     if (this.currentCryptos.length === 0 && this.isSearchMode) {
       this.handleSearchClear();
     }
+    this.startRealtimeTableUpdates();
   }
 
   /**
@@ -181,6 +215,7 @@ export class CryptoDashboardApp {
         });
       }, 100);
     }
+    this.startRealtimeTableUpdates();
   }
 
   /**
