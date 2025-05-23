@@ -48,7 +48,7 @@ export class CryptoRowComponent {
             src="${this.data.image}"
             alt="${this.data.name} logo"
             class="crypto-icon"
-            onerror="this.src='/api/placeholder/32/32'"
+            onerror="this.src='/public/images/placeholder_32.webp'"
           />
           <div>
             <div class="crypto-name">${this.data.name}</div>
@@ -174,6 +174,7 @@ export class CryptoRowComponent {
   endLoading(): void {
     if (!this.isloading) return;
     this.element.innerHTML = this.getRowHTML();
+    this.attachEventListeners();
     this.isloading = false;
   }
 

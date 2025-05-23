@@ -9,7 +9,8 @@ import { Observable } from "rxjs";
 export class CryptoService {
   private coinGeckoService: CoinGeckoService;
   private currentData: CryptoMarketData[] = [];
-  private readonly UPDATE_INTERVAL = 30000; // 30 seconds
+  private readonly TABLE_UPDATE_INTERVAL = process.env.APP_TABLE_POOLING_FREQUENCY ? parseInt(process.env.APP_TABLE_POOLING_FREQUENCY) * 1000 : 30000; // 30 seconds
+  private readonly LIVE_CHART_UPDATE_INTERVAL = process.env.APP_LIVE_CHART_POOLING_FREQUENCY ? parseInt(process.env.APP_LIVE_CHART_POOLING_FREQUENCY) * 1000 : 30000; // 30 seconds
 
   constructor(apiKey?: string) {
     this.coinGeckoService = new CoinGeckoService(apiKey);
@@ -78,7 +79,7 @@ export class CryptoService {
 
       const intervalId = window.setInterval(
         intervalFunction,
-        this.UPDATE_INTERVAL,
+        this.LIVE_CHART_UPDATE_INTERVAL,
       );
 
       return () => {
@@ -116,7 +117,7 @@ export class CryptoService {
 
       const intervalId = window.setInterval(
         intervalFunction,
-        this.UPDATE_INTERVAL,
+        this.TABLE_UPDATE_INTERVAL,
       );
 
       return () => {
