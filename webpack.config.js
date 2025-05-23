@@ -6,9 +6,26 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import sass from 'sass';
+import webpack from 'webpack';
+import dotenv from 'dotenv';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Load environment variables from .env file
+const env = dotenv.config().parsed || {};
+
+// Filter out variables that start with a specific prefix (optional security measure)
+const envKeys = Object.keys(env).reduce((prev, next) => {
+  // Only expose variables that start with 'APP_' or 'PUBLIC_' for security
+  if (next.startsWith('APP_') || next.startsWith('PUBLIC_')) {
+    prev[`process.env.${next}`] = JSON.stringify(env[next]);
+  }
+  return prev;
+}, {});
+
+// Always include NODE_ENV
+envKeys['process.env.NODE_ENV'] = JSON.stringify(process.env.NODE_ENV || 'development');
 
 export default {
   mode: process.env.NODE_ENV || 'development',
@@ -67,6 +84,8 @@ export default {
       filename: 'index.html',
       inject: true,
     }),
+    // Define environment variables
+    new webpack.DefinePlugin(envKeys),
     // Only copy public directory if it exists
     new CopyPlugin({
       patterns: [

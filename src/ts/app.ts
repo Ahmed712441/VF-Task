@@ -254,16 +254,13 @@ export class CryptoDashboardApp {
   }
 }
 
-declare global {
-  interface Window {
-    cryptoApp: CryptoDashboardApp;
-  }
-}
-
 // Initialize application when DOM is ready
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    const apiKey = "CG-M1X1DtVvN1zhgipQrefJ7v3Y";
+    if (!process.env.APP_COINGECKO_API_KEY) {
+      throw new Error("Coingecko API key is not set in environment variables");
+    }
+    const apiKey = process.env.APP_COINGECKO_API_KEY;
     const app = new CryptoDashboardApp(apiKey);
 
     // Make app globally available for debugging
