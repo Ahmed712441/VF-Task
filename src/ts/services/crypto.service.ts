@@ -102,16 +102,15 @@ export class CryptoService {
             subscriber.next(updatedData);
           } else {
             // subscriber.error(
-            //   `No data found for coin ID: ${coinId}`
+            //   `Error in finding data for: [${coinIds}]`
             // );
           }
         } catch (error) {
           // subscriber.error(
-          //   `Failed to update real-time data for ${coinId}: ${error}`
+          //   `Error in finding data for: [${coinIds}]`
           // );
         }
       };
-      intervalFunction();
 
       const intervalId = window.setInterval(
         intervalFunction,

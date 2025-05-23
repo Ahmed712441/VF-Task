@@ -74,12 +74,9 @@ export class CryptoDashboardApp {
    */
   async initialize(): Promise<void> {
     try {
-      this.showLoadingState();
 
       // Load initial data
       await this.loadInitialData();
-
-      this.removeGlobalLoading();
 
       console.log("Application initialized successfully");
     } catch (error) {
@@ -132,7 +129,7 @@ export class CryptoDashboardApp {
     this.currentTableSubscription = this.cryptoService
       .getRealtimeTableUpdates(this.currentCryptos.map((crypto) => crypto.id))
       .subscribe((newList) => {
-        this.handleTableUpdate(newList);
+        this.handleTableUpdate(newList,false);
     });
   }
 
@@ -158,7 +155,8 @@ export class CryptoDashboardApp {
       // Return to top cryptos
       try {
         const currentCryptos = await this.cryptoService.getTopCryptos(10);
-        this.handleTableUpdate(currentCryptos,true);
+        this.handleTableUpdate(currentCryptos,false);
+        this.startRealtimeTableUpdates();
       } catch (error) {
         console.error("Failed to reload top cryptos:", error);
       }
@@ -172,9 +170,9 @@ export class CryptoDashboardApp {
     try {
       this.isSearchMode = true;
       const results = await this.cryptoService.getSearchResults(data.query);
-
       if (results.length > 0) {
-        this.handleTableUpdate(results);
+        this.handleTableUpdate(results,false);
+        this.startRealtimeTableUpdates();
       } else {
         this.cryptoListComponent.showEmpty(
           `No results found for "${data.query}"`
@@ -214,25 +212,8 @@ export class CryptoDashboardApp {
           data: this.currentCryptos[0],
         });
       }, 100);
+      this.startRealtimeTableUpdates();
     }
-    this.startRealtimeTableUpdates();
-  }
-
-  /**
-   * Show loading state
-   */
-  private showLoadingState(): void {
-    this.cryptoListComponent.clear();
-    // Add loading indicator to the page
-    const loadingEl = document.createElement("div");
-    loadingEl.id = "global-loading";
-    loadingEl.innerHTML = `
-      <div style="text-align: center; padding: 2rem;">
-        <div style="font-size: 2rem; margin-bottom: 1rem;">⏳</div>
-        <p>Loading cryptocurrency data...</p>
-      </div>
-    `;
-    document.body.appendChild(loadingEl);
   }
 
   /**
@@ -240,7 +221,6 @@ export class CryptoDashboardApp {
    */
   private showErrorState(message: string): void {
     this.cryptoListComponent.showError(message);
-    this.removeGlobalLoading();
   }
 
   /**
@@ -257,17 +237,6 @@ export class CryptoDashboardApp {
   }
 
   /**
-   * Remove global loading indicator
-   */
-  private removeGlobalLoading(): void {
-    const loadingEl = document.getElementById("global-loading");
-    if (loadingEl) {
-      loadingEl.remove();
-      console.log("Global loading indicator removed");
-    }
-  }
-
-  /**
    * Destroy the application
    */
   destroy(): void {
@@ -276,7 +245,6 @@ export class CryptoDashboardApp {
     this.searchComponent.destroy();
     this.liveChartComponent.destroy();
     eventBus.clear();
-    this.removeGlobalLoading();
   }
 }
 

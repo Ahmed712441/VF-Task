@@ -4,6 +4,7 @@ import { SelectorComponent } from "./base.component";
 export class SearchComponent extends SelectorComponent {
   private inputElement: HTMLInputElement;
   private searchTimeout: number | null = null;
+  private currentQuery: string = "";
 
   constructor(inputSelector: string) {
     super(inputSelector);
@@ -54,7 +55,8 @@ export class SearchComponent extends SelectorComponent {
       case "Enter": {
         e.preventDefault();
         const query = this.inputElement.value.trim();
-        if (query) {
+        if (query && this.currentQuery !== query) {
+          this.currentQuery = query;
           eventBus.publish("search:submit", { query });
         }
         break;

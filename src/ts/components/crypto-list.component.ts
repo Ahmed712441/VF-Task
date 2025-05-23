@@ -36,20 +36,19 @@ export class CryptoListComponent extends SelectorComponent {
    * Render cryptocurrency list
    */
   render(cryptos: CryptoMarketData[]): void {
-    this.showLoading();
 
     // Clear existing rows
     this.clear();
 
     // Create new rows
+    const fragment = document.createDocumentFragment();
     cryptos.forEach((crypto) => {
       const rowComponent = new CryptoRowComponent(crypto);
       this.cryptoRows.set(crypto.id, rowComponent);
-      this.tableBody.appendChild(rowComponent.getElement());
+      fragment.appendChild(rowComponent.getElement());
     });
-
-    this.hideLoading();
-
+    this.tableBody.appendChild(fragment);
+    
     // Publish render complete event
     eventBus.publish("cryptoList:rendered", { count: cryptos.length });
   }
@@ -58,25 +57,32 @@ export class CryptoListComponent extends SelectorComponent {
    * Update existing rows with new data
    */
   update(cryptos: CryptoMarketData[]): void {
-    cryptos.forEach((crypto) => {
-      const existingRow = this.cryptoRows.get(crypto.id);
-      if (existingRow) {
-        existingRow.update(crypto);
-      } else {
-        // Add new crypto if not exists
-        const newRow = new CryptoRowComponent(crypto);
-        this.cryptoRows.set(crypto.id, newRow);
-        this.tableBody.appendChild(newRow.getElement());
+    const newCryptoRows = new Map<string,CryptoRowComponent>();
+    const entriesInOrder = Array.from(this.cryptoRows.values());
+    const hasRemovedItems = cryptos.length < entriesInOrder.length;
+    const hasAddedItems = cryptos.length > entriesInOrder.length;
+    const minLength = Math.min(cryptos.length, entriesInOrder.length);
+    for(let i = 0; i < minLength; i++) {
+      entriesInOrder[i].update(cryptos[i]);
+      newCryptoRows.set(cryptos[i].id, entriesInOrder[i]);
+    }
+    if(hasRemovedItems) {
+      for(let i = minLength; i < entriesInOrder.length; i++) {
+        const row = entriesInOrder[i];
+        row.destroy();
       }
-    });
-
-    // Remove cryptos that are no longer in the data
-    const currentIds = new Set(cryptos.map((c) => c.id));
-    this.cryptoRows.forEach((row, id) => {
-      if (!currentIds.has(id)) {
-        this.removeCrypto({ id });
+    }
+    else if(hasAddedItems) {
+      const fragment = document.createDocumentFragment();
+      for(let i = minLength; i < cryptos.length; i++) {
+        const newRow = new CryptoRowComponent(cryptos[i]);
+        newCryptoRows.set(cryptos[i].id, newRow);
+        fragment.appendChild(newRow.getElement());
       }
-    });
+      this.tableBody.appendChild(fragment);
+    }
+    this.cryptoRows = newCryptoRows;
+    eventBus.publish("cryptoList:re-rendered", { count: cryptos.length });
   }
 
   /**

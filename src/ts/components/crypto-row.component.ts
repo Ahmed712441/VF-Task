@@ -60,7 +60,7 @@ export class CryptoRowComponent {
       <td class="change-cell" data-label="Change">
         <span class="change-value ${priceChangeClass}">${formattedChange}</span>
       </td>
-      <td class="chart-cell" data-label="Chart">
+      <td class="chart-cell" data-label="Chart (7d)">
         <div class="mini-chart">
           ${miniChart}
         </div>
@@ -116,9 +116,10 @@ export class CryptoRowComponent {
    */
   update(newData: CryptoMarketData): void {
     const hasChanged = this.hasDataChanged(newData);
-    this.data = newData;
+    
 
     if (hasChanged) {
+      this.data = newData;
       // Add update animation class
       this.element.classList.add("updating");
 

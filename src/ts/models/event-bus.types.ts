@@ -33,4 +33,5 @@ export interface AppEvents extends EventMap {
   "search:clear": object;
   "search:submit": { query: string };
   "cryptoList:back": object;
+  "cryptoList:re-rendered": { count: number };
 }
