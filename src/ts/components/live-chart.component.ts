@@ -137,7 +137,7 @@ export class LiveChartComponent extends SelectorComponent {
           },
           ticks: {
             callback: function (value: string | number) {
-              return "$" + Number(value).toLocaleString();
+              return "$" + value;
             },
           },
         },
@@ -156,7 +156,7 @@ export class LiveChartComponent extends SelectorComponent {
               return new Date(context[0].parsed.x).toLocaleString();
             },
             label: function (context: TooltipItem<"line">) {
-              return `${context.dataset.label}: $${Number(context.parsed.y).toLocaleString()}`;
+              return `${context.dataset.label}: $${context.formattedValue}`;
             },
           },
         },

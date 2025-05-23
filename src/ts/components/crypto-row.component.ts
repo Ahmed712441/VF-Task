@@ -35,10 +35,10 @@ export class CryptoRowComponent {
       this.data.price_change_percentage_24h >= 0 ? "positive" : "negative";
     const formattedPrice = FormatUtils.formatPrice(this.data.current_price);
     const formattedChange = FormatUtils.formatPercentage(
-      this.data.price_change_percentage_24h
+      this.data.price_change_percentage_24h,
     );
     const miniChart = ChartUtils.createMiniChart(
-      this.data.sparkline_in_7d.price
+      this.data.sparkline_in_7d.price,
     );
 
     return `

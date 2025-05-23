@@ -4,7 +4,7 @@ import {
   CryptoMarketData,
 } from "../models/crypto.model";
 import { CoinGeckoService } from "./coingecko.service";
-import { Observable, Subscriber } from "rxjs";
+import { Observable } from "rxjs";
 
 export class CryptoService {
   private coinGeckoService: CoinGeckoService;
@@ -53,15 +53,13 @@ export class CryptoService {
   /**
    * Subscribe to real-time price updates for specific cryptocurrencies
    */
-  getRealtimePriceUpdates(
-    coinId: string
-  ): Observable<CryptoHistoricalData> {
+  getRealtimePriceUpdates(coinId: string): Observable<CryptoHistoricalData> {
     return new Observable<CryptoHistoricalData>((subscriber) => {
       console.log(`Starting real-time cryptocurrency updates for ${coinId}`);
       const intervalFunction = async () => {
         try {
           const updatedData =
-            await this.coinGeckoService.getCryptoHistoricalDataById(coinId);      
+            await this.coinGeckoService.getCryptoHistoricalDataById(coinId);
           if (updatedData) {
             subscriber.next(updatedData);
           } else {
@@ -70,6 +68,7 @@ export class CryptoService {
             // );
           }
         } catch (error) {
+          console.log(`Error in real-time data update for ${coinId}: ${error}`);
           // subscriber.error(
           //   `Failed to update real-time data for ${coinId}: ${error}`
           // );
@@ -79,25 +78,25 @@ export class CryptoService {
 
       const intervalId = window.setInterval(
         intervalFunction,
-        this.UPDATE_INTERVAL
+        this.UPDATE_INTERVAL,
       );
 
       return () => {
         clearInterval(intervalId);
         console.log(`Stopped real-time cryptocurrency updates for ${coinId}`);
-      }
+      };
     });
   }
 
-  getRealtimeTableUpdates(
-    coinIds: string[]
-  ): Observable<CryptoMarketData[]> {
+  getRealtimeTableUpdates(coinIds: string[]): Observable<CryptoMarketData[]> {
     return new Observable<CryptoMarketData[]>((subscriber) => {
-      console.log(`Starting real-time cryptocurrency updates for table [${coinIds}]`);
+      console.log(
+        `Starting real-time cryptocurrency updates for table [${coinIds}]`,
+      );
       const intervalFunction = async () => {
         try {
           const updatedData =
-            await this.coinGeckoService.getCryptosByIds(coinIds);      
+            await this.coinGeckoService.getCryptosByIds(coinIds);
           if (updatedData) {
             subscriber.next(updatedData);
           } else {
@@ -106,6 +105,9 @@ export class CryptoService {
             // );
           }
         } catch (error) {
+          console.log(
+            `Error in real-time data update for table [${coinIds}]: ${error}`,
+          );
           // subscriber.error(
           //   `Error in finding data for: [${coinIds}]`
           // );
@@ -114,13 +116,15 @@ export class CryptoService {
 
       const intervalId = window.setInterval(
         intervalFunction,
-        this.UPDATE_INTERVAL
+        this.UPDATE_INTERVAL,
       );
 
       return () => {
         clearInterval(intervalId);
-        console.log(`Stopped real-time cryptocurrency updates for table [${coinIds}]`);
-      }
+        console.log(
+          `Stopped real-time cryptocurrency updates for table [${coinIds}]`,
+        );
+      };
     });
   }
 

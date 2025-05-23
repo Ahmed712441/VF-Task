@@ -36,7 +36,6 @@ export class CryptoListComponent extends SelectorComponent {
    * Render cryptocurrency list
    */
   render(cryptos: CryptoMarketData[]): void {
-
     // Clear existing rows
     this.clear();
 
@@ -48,7 +47,7 @@ export class CryptoListComponent extends SelectorComponent {
       fragment.appendChild(rowComponent.getElement());
     });
     this.tableBody.appendChild(fragment);
-    
+
     // Publish render complete event
     eventBus.publish("cryptoList:rendered", { count: cryptos.length });
   }
@@ -57,24 +56,23 @@ export class CryptoListComponent extends SelectorComponent {
    * Update existing rows with new data
    */
   update(cryptos: CryptoMarketData[]): void {
-    const newCryptoRows = new Map<string,CryptoRowComponent>();
+    const newCryptoRows = new Map<string, CryptoRowComponent>();
     const entriesInOrder = Array.from(this.cryptoRows.values());
     const hasRemovedItems = cryptos.length < entriesInOrder.length;
     const hasAddedItems = cryptos.length > entriesInOrder.length;
     const minLength = Math.min(cryptos.length, entriesInOrder.length);
-    for(let i = 0; i < minLength; i++) {
+    for (let i = 0; i < minLength; i++) {
       entriesInOrder[i].update(cryptos[i]);
       newCryptoRows.set(cryptos[i].id, entriesInOrder[i]);
     }
-    if(hasRemovedItems) {
-      for(let i = minLength; i < entriesInOrder.length; i++) {
+    if (hasRemovedItems) {
+      for (let i = minLength; i < entriesInOrder.length; i++) {
         const row = entriesInOrder[i];
         row.destroy();
       }
-    }
-    else if(hasAddedItems) {
+    } else if (hasAddedItems) {
       const fragment = document.createDocumentFragment();
-      for(let i = minLength; i < cryptos.length; i++) {
+      for (let i = minLength; i < cryptos.length; i++) {
         const newRow = new CryptoRowComponent(cryptos[i]);
         newCryptoRows.set(cryptos[i].id, newRow);
         fragment.appendChild(newRow.getElement());
