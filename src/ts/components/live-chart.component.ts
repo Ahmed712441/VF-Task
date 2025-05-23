@@ -12,12 +12,12 @@ import {
   Filler,
   ChartData,
   ChartOptions,
-  TooltipItem
-} from 'chart.js';
-import { eventBus } from '../utils/event-bus';
-import { LiveChartData } from '../models/live-chart.model';
-import 'chartjs-adapter-date-fns';
-import { SelectorComponent } from './base.component';
+  TooltipItem,
+} from "chart.js";
+import { eventBus } from "../utils/event-bus";
+import { LiveChartData } from "../models/live-chart.model";
+import "chartjs-adapter-date-fns";
+import { SelectorComponent } from "./base.component";
 
 // Register Chart.js components
 ChartJS.register(
@@ -30,7 +30,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
 );
 
 export class LiveChartComponent extends SelectorComponent {
@@ -51,14 +51,14 @@ export class LiveChartComponent extends SelectorComponent {
   private initializeChart(): void {
     try {
       this.chart = new ChartJS(this.canvas, {
-        type: 'line',
+        type: "line",
         data: this.getInitialData(),
-        options: this.getChartOptions()
+        options: this.getChartOptions(),
       });
 
-      console.log('Chart initialized successfully');
+      console.log("Chart initialized successfully");
     } catch (error) {
-      console.error('Failed to initialize chart:', error);
+      console.error("Failed to initialize chart:", error);
       this.showChartError();
     }
   }
@@ -67,103 +67,105 @@ export class LiveChartComponent extends SelectorComponent {
    * Setup event listeners
    */
   private setupEventListeners(): void {
-    const unsubscribe = eventBus.subscribe('crypto:live-data', (data) => {
+    const unsubscribe = eventBus.subscribe("crypto:live-data", (data) => {
       this.selectCrypto(data);
-    })
+    });
     this.unsubscribeEvents.push(unsubscribe);
   }
 
   /**
    * Get initial chart data
    */
-  private getInitialData(): ChartData<'line'> {
+  private getInitialData(): ChartData<"line"> {
     return {
       labels: [],
-      datasets: [{
-        label: 'Select a cryptocurrency',
-        data: [],
-        borderColor: '#2563eb',
-        backgroundColor: 'rgba(37, 99, 235, 0.1)',
-        borderWidth: 2,
-        fill: true,
-        tension: 0.4
-      }]
+      datasets: [
+        {
+          label: "Select a cryptocurrency",
+          data: [],
+          borderColor: "#2563eb",
+          backgroundColor: "rgba(37, 99, 235, 0.1)",
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+        },
+      ],
     };
   }
 
   /**
    * Get chart options
    */
-  private getChartOptions(): ChartOptions<'line'> {
+  private getChartOptions(): ChartOptions<"line"> {
     return {
       responsive: true,
       maintainAspectRatio: false,
       scales: {
         x: {
-          type: 'time', // Enable time scale
+          type: "time", // Enable time scale
           display: true,
           title: {
             display: true,
-            text: 'Time (24 hours)'
+            text: "Time (24 hours)",
           },
           grid: {
-            color: 'rgba(0, 0, 0, 0.1)'
+            color: "rgba(0, 0, 0, 0.1)",
           },
           time: {
             // For 24-hour crypto data, hour unit usually works well
-            unit: 'hour',
+            unit: "hour",
             displayFormats: {
-              hour: 'HH:mm', // Show time as 14:30, 15:00, etc.
-              day: 'MMM d'   // Fallback for longer periods
+              hour: "HH:mm", // Show time as 14:30, 15:00, etc.
+              day: "MMM d", // Fallback for longer periods
             },
-            tooltipFormat: 'MMM d, HH:mm' // Detailed format for tooltips
+            tooltipFormat: "MMM d, HH:mm", // Detailed format for tooltips
           },
           ticks: {
             maxTicksLimit: 8, // Prevent overcrowding
             autoSkip: true,
-            source: 'auto'
-          }
+            source: "auto",
+          },
         },
         y: {
           display: true,
           title: {
             display: true,
-            text: 'Price (USD)'
+            text: "Price (USD)",
           },
           grid: {
-            color: 'rgba(0, 0, 0, 0.1)'
+            color: "rgba(0, 0, 0, 0.1)",
           },
           ticks: {
-            callback: function(value: string | number) {
-              return '$' + Number(value).toLocaleString();
-            }
-          }
-        }
+            callback: function (value: string | number) {
+              return "$" + Number(value).toLocaleString();
+            },
+          },
+        },
       },
       plugins: {
         legend: {
           display: true,
-          position: 'top'
+          position: "top",
         },
         tooltip: {
-          mode: 'index',
+          mode: "index",
           intersect: false,
           callbacks: {
-            title: function(context: TooltipItem<'line'>[]) {
+            title: function (context: TooltipItem<"line">[]) {
               // Format the timestamp in tooltip title
               return new Date(context[0].parsed.x).toLocaleString();
             },
-            label: function(context: TooltipItem<'line'>) {
+            label: function (context: TooltipItem<"line">) {
               return `${context.dataset.label}: $${Number(context.parsed.y).toLocaleString()}`;
-            }
-          }
-        }
+            },
+          },
+        },
       },
       interaction: {
-        mode: 'nearest',
-        axis: 'x',
-        intersect: false
-      }
+        mode: "nearest",
+        axis: "x",
+        intersect: false,
+      },
     };
   }
 
@@ -181,39 +183,48 @@ export class LiveChartComponent extends SelectorComponent {
   private updateChart(): void {
     if (!this.chart || !this.selectedCrypto) return;
 
-    const sparklineData = this.selectedCrypto.historical_data.prices.map(([timestamp, price]) => {
-      return {
-        x: timestamp,
-        y: price
-      };
-    });
-  
+    const sparklineData = this.selectedCrypto.historical_data.prices.map(
+      ([timestamp, price]) => {
+        return {
+          x: timestamp,
+          y: price,
+        };
+      },
+    );
+
     // Determine color based on trend
     const firstPrice = this.selectedCrypto.historical_data.prices[0]?.[1] || 0;
-    const lastPrice = this.selectedCrypto.historical_data.prices[this.selectedCrypto.historical_data.prices.length - 1]?.[1] || 0;
+    const lastPrice =
+      this.selectedCrypto.historical_data.prices[
+        this.selectedCrypto.historical_data.prices.length - 1
+      ]?.[1] || 0;
     const isPositive = lastPrice >= firstPrice;
-    const borderColor = isPositive ? '#22c55e' : '#ef4444';
-    const backgroundColor = isPositive ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)';
-    
+    const borderColor = isPositive ? "#22c55e" : "#ef4444";
+    const backgroundColor = isPositive
+      ? "rgba(34, 197, 94, 0.1)"
+      : "rgba(239, 68, 68, 0.1)";
+
     this.chart.data = {
       // labels:labels,
-      datasets: [{
-        label: `${this.selectedCrypto.data.name} (${this.selectedCrypto.data.symbol.toUpperCase()})`,
-        data: sparklineData,
-        borderColor: borderColor,
-        backgroundColor: backgroundColor,
-        borderWidth: 2,
-        fill: true,
-        tension: 0.4,
-        pointRadius: 0,
-        pointHoverRadius: 6,
-        pointHoverBackgroundColor: borderColor,
-        pointHoverBorderColor: '#fff',
-        pointHoverBorderWidth: 2
-      }]
+      datasets: [
+        {
+          label: `${this.selectedCrypto.data.name} (${this.selectedCrypto.data.symbol.toUpperCase()})`,
+          data: sparklineData,
+          borderColor: borderColor,
+          backgroundColor: backgroundColor,
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          pointHoverRadius: 6,
+          pointHoverBackgroundColor: borderColor,
+          pointHoverBorderColor: "#fff",
+          pointHoverBorderWidth: 2,
+        },
+      ],
     };
 
-    this.chart.update('none'); // No animation for real-time updates
+    this.chart.update("none"); // No animation for real-time updates
   }
 
   /**

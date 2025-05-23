@@ -3,11 +3,11 @@ export class FormatUtils {
    * Format price to USD currency
    */
   static formatPrice(price: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
       minimumFractionDigits: 2,
-      maximumFractionDigits: 6
+      maximumFractionDigits: 6,
     }).format(price);
   }
 
@@ -16,11 +16,11 @@ export class FormatUtils {
    */
   static formatPercentage(percentage: number): string {
     if (!percentage) {
-      console.warn('Percentage is null or undefined',percentage);
-      return '0.00%';
+      console.warn("Percentage is null or undefined", percentage);
+      return "0.00%";
     }
     const formatted = percentage.toFixed(2);
-    return `${percentage >= 0 ? '+' : ''}${formatted}%`;
+    return `${percentage >= 0 ? "+" : ""}${formatted}%`;
   }
 
   /**
@@ -44,7 +44,7 @@ export class FormatUtils {
    */
   static truncateText(text: string, maxLength: number): string {
     if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
+    return text.substring(0, maxLength) + "...";
   }
 
   /**

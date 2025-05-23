@@ -1,7 +1,7 @@
-import { CryptoMarketData } from '../models/crypto.model';
-import { CryptoRowComponent } from './crypto-row.component';
-import { eventBus } from '../utils/event-bus';
-import { SelectorComponent } from './base.component';
+import { CryptoMarketData } from "../models/crypto.model";
+import { CryptoRowComponent } from "./crypto-row.component";
+import { eventBus } from "../utils/event-bus";
+import { SelectorComponent } from "./base.component";
 
 export class CryptoListComponent extends SelectorComponent {
   private tableBody: HTMLTableSectionElement;
@@ -10,10 +10,12 @@ export class CryptoListComponent extends SelectorComponent {
 
   constructor(containerSelector: string) {
     super(containerSelector);
-    this.tableBody = this.container.querySelector('#cryptoTableBody') as HTMLTableSectionElement;
-    
+    this.tableBody = this.container.querySelector(
+      "#cryptoTableBody",
+    ) as HTMLTableSectionElement;
+
     if (!this.tableBody) {
-      throw new Error('Table body element not found');
+      throw new Error("Table body element not found");
     }
 
     this.setupEventListeners();
@@ -23,7 +25,10 @@ export class CryptoListComponent extends SelectorComponent {
    * Setup event listeners
    */
   private setupEventListeners(): void {
-    const unsubscribe = eventBus.subscribe('crypto:remove', this.removeCrypto.bind(this));
+    const unsubscribe = eventBus.subscribe(
+      "crypto:remove",
+      this.removeCrypto.bind(this),
+    );
     this.unsubscribeEvents.push(unsubscribe);
   }
 
@@ -32,28 +37,28 @@ export class CryptoListComponent extends SelectorComponent {
    */
   render(cryptos: CryptoMarketData[]): void {
     this.showLoading();
-    
+
     // Clear existing rows
     this.clear();
-    
+
     // Create new rows
-    cryptos.forEach(crypto => {
+    cryptos.forEach((crypto) => {
       const rowComponent = new CryptoRowComponent(crypto);
       this.cryptoRows.set(crypto.id, rowComponent);
       this.tableBody.appendChild(rowComponent.getElement());
     });
 
     this.hideLoading();
-    
+
     // Publish render complete event
-    eventBus.publish('cryptoList:rendered', { count: cryptos.length });
+    eventBus.publish("cryptoList:rendered", { count: cryptos.length });
   }
 
   /**
    * Update existing rows with new data
    */
   update(cryptos: CryptoMarketData[]): void {
-    cryptos.forEach(crypto => {
+    cryptos.forEach((crypto) => {
       const existingRow = this.cryptoRows.get(crypto.id);
       if (existingRow) {
         existingRow.update(crypto);
@@ -66,10 +71,10 @@ export class CryptoListComponent extends SelectorComponent {
     });
 
     // Remove cryptos that are no longer in the data
-    const currentIds = new Set(cryptos.map(c => c.id));
+    const currentIds = new Set(cryptos.map((c) => c.id));
     this.cryptoRows.forEach((row, id) => {
       if (!currentIds.has(id)) {
-        this.removeCrypto({id});
+        this.removeCrypto({ id });
       }
     });
   }
@@ -77,23 +82,20 @@ export class CryptoListComponent extends SelectorComponent {
   /**
    * Remove a cryptocurrency from the list
    */
-  private removeCrypto(data: {
-    id: string;
-    name?: string;
-  }): void {
+  private removeCrypto(data: { id: string; name?: string }): void {
     const cryptoId = data.id;
     const rowComponent = this.cryptoRows.get(cryptoId);
     if (rowComponent) {
       // Add removal animation
       const element = rowComponent.getElement();
-      element.style.animation = 'fadeOut 0.3s ease-out forwards';
-      
+      element.style.animation = "fadeOut 0.3s ease-out forwards";
+
       setTimeout(() => {
         rowComponent.destroy();
         this.cryptoRows.delete(cryptoId);
-        
+
         // Publish removal event
-        eventBus.publish('cryptoList:cryptoRemoved', { id: cryptoId });
+        eventBus.publish("cryptoList:cryptoRemoved", { id: cryptoId });
       }, 300);
     }
   }
@@ -103,16 +105,16 @@ export class CryptoListComponent extends SelectorComponent {
    */
   filter(searchTerm: string): void {
     const term = searchTerm.toLowerCase().trim();
-    
-    this.cryptoRows.forEach(rowComponent => {
+
+    this.cryptoRows.forEach((rowComponent) => {
       const crypto = rowComponent.getData();
-      const matches = 
+      const matches =
         crypto.name.toLowerCase().includes(term) ||
         crypto.symbol.toLowerCase().includes(term) ||
         crypto.id.toLowerCase().includes(term);
-      
+
       const element = rowComponent.getElement();
-      element.style.display = matches || term === '' ? '' : 'none';
+      element.style.display = matches || term === "" ? "" : "none";
     });
   }
 
@@ -121,7 +123,7 @@ export class CryptoListComponent extends SelectorComponent {
    */
   private showLoading(): void {
     if (this.isLoading) return;
-    
+
     this.isLoading = true;
     this.tableBody.innerHTML = `
       <tr class="loading-row">
@@ -159,7 +161,7 @@ export class CryptoListComponent extends SelectorComponent {
   /**
    * Show empty state
    */
-  showEmpty(message: string = 'No cryptocurrencies found'): void {
+  showEmpty(message: string = "No cryptocurrencies found"): void {
     this.tableBody.innerHTML = `
       <tr class="empty-row">
         <td colspan="5" style="text-align: center; padding: 2rem; color: var(--color-text-light);">
@@ -176,9 +178,9 @@ export class CryptoListComponent extends SelectorComponent {
    * Clear all rows
    */
   clear(): void {
-    this.cryptoRows.forEach(row => row.destroy());
+    this.cryptoRows.forEach((row) => row.destroy());
     this.cryptoRows.clear();
-    this.tableBody.innerHTML = '';
+    this.tableBody.innerHTML = "";
   }
 
   /**
@@ -192,7 +194,7 @@ export class CryptoListComponent extends SelectorComponent {
    * Get all current cryptocurrency data
    */
   getAllData(): CryptoMarketData[] {
-    return Array.from(this.cryptoRows.values()).map(row => row.getData());
+    return Array.from(this.cryptoRows.values()).map((row) => row.getData());
   }
 
   /**

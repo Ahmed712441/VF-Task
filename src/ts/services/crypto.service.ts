@@ -1,9 +1,16 @@
-import { CryptoBasic, CryptoHistoricalData, CryptoMarketData } from "../models/crypto.model";
+import {
+  CryptoBasic,
+  CryptoHistoricalData,
+  CryptoMarketData,
+} from "../models/crypto.model";
 import { CoinGeckoService } from "./coingecko.service";
 
 export class CryptoService {
   private coinGeckoService: CoinGeckoService;
-  private updateCallbacks: Map<string, Array<(data: CryptoHistoricalData,id:string) => void>> = new Map();
+  private updateCallbacks: Map<
+    string,
+    Array<(data: CryptoHistoricalData, id: string) => void>
+  > = new Map();
   private currentData: CryptoMarketData[] = [];
   private updateIntervals: Map<string, number> = new Map();
   private readonly UPDATE_INTERVAL = 30000; // 30 seconds
@@ -21,7 +28,7 @@ export class CryptoService {
       this.currentData = data;
       return data;
     } catch (error) {
-      console.error('Failed to get top cryptocurrencies:', error);
+      console.error("Failed to get top cryptocurrencies:", error);
       throw error;
     }
   }
@@ -39,10 +46,10 @@ export class CryptoService {
   async getSearchResults(query: string): Promise<CryptoMarketData[]> {
     try {
       const searchResults = await this.searchCryptos(query);
-      const ids = searchResults.map(crypto => crypto.id);
+      const ids = searchResults.map((crypto) => crypto.id);
       return this.coinGeckoService.getCryptosByIds(ids);
     } catch (error) {
-      console.error('Failed to get search results:', error);
+      console.error("Failed to get search results:", error);
       throw error;
     }
   }
@@ -51,13 +58,13 @@ export class CryptoService {
    * Subscribe to real-time price updates
    */
   subscribeToPriceUpdates(
-    callback: (data: CryptoHistoricalData, id:string) => void,
+    callback: (data: CryptoHistoricalData, id: string) => void,
     coinId: string,
   ): void {
     if (!this.updateCallbacks.has(coinId)) {
       this.updateCallbacks.set(coinId, []);
     }
-    
+
     this.updateCallbacks.get(coinId)!.push(callback);
 
     // Start update interval if not already running
@@ -70,7 +77,7 @@ export class CryptoService {
    * Unsubscribe from price updates
    */
   unsubscribeFromPriceUpdates(
-    callback: (data: CryptoHistoricalData, id:string) => void,
+    callback: (data: CryptoHistoricalData, id: string) => void,
     coinId: string,
   ): void {
     const callbacks = this.updateCallbacks.get(coinId);
@@ -90,35 +97,40 @@ export class CryptoService {
   /**
    * Start real-time updates
    */
-  private startRealTimeUpdates(
-    coinId: string,
-  ): void {
+  private startRealTimeUpdates(coinId: string): void {
     if (this.updateIntervals.has(coinId)) {
       console.warn(`Real-time updates for ${coinId} are already running.`);
       return;
     }
 
-    const intervalFunction = async () => { 
+    const intervalFunction = async () => {
       try {
-        const updatedData = await this.coinGeckoService.getCryptoHistoricalDataById(coinId);
+        const updatedData =
+          await this.coinGeckoService.getCryptoHistoricalDataById(coinId);
         const callbacks = this.updateCallbacks.get(coinId);
-        
+
         if (callbacks && updatedData) {
-          callbacks.forEach(callback => {
+          callbacks.forEach((callback) => {
             try {
-              callback(updatedData,coinId);
+              callback(updatedData, coinId);
             } catch (error) {
-              console.error(`Error in real-time update callback for ${coinId}:`, error);
+              console.error(
+                `Error in real-time update callback for ${coinId}:`,
+                error,
+              );
             }
           });
         }
       } catch (error) {
         console.error(`Failed to update real-time data for ${coinId}:`, error);
       }
-    }
+    };
     intervalFunction();
 
-    const intervalId = window.setInterval(intervalFunction, this.UPDATE_INTERVAL);
+    const intervalId = window.setInterval(
+      intervalFunction,
+      this.UPDATE_INTERVAL,
+    );
     this.updateIntervals.set(coinId, intervalId);
     console.log(`Started real-time cryptocurrency updates for ${coinId}`);
   }
@@ -126,9 +138,7 @@ export class CryptoService {
   /**
    * Stop real-time updates
    */
-  public stopRealTimeUpdates(
-    coinId: string,
-  ): void {
+  public stopRealTimeUpdates(coinId: string): void {
     if (this.updateIntervals.has(coinId)) {
       clearInterval(this.updateIntervals.get(coinId));
       this.updateIntervals.delete(coinId);
@@ -143,7 +153,7 @@ export class CryptoService {
     });
     this.updateCallbacks.clear();
     this.updateIntervals.clear();
-    console.log('Stopped all real-time cryptocurrency updates');
+    console.log("Stopped all real-time cryptocurrency updates");
   }
 
   /**
@@ -158,7 +168,7 @@ export class CryptoService {
    */
   async refreshData(): Promise<CryptoMarketData[]> {
     if (this.currentData.length > 0) {
-      const ids = this.currentData.map(crypto => crypto.id);
+      const ids = this.currentData.map((crypto) => crypto.id);
       const updatedData = await this.coinGeckoService.getCryptosByIds(ids);
       this.currentData = updatedData;
       return updatedData;

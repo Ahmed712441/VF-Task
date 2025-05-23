@@ -7,7 +7,7 @@ export interface ApiError {
 }
 
 export interface RequestConfig<TData = unknown> {
-  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   url: string;
   params?: Record<string, Primitives>;
   data?: TData;

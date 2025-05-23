@@ -1,5 +1,5 @@
-import { eventBus } from '../utils/event-bus';
-import { SelectorComponent } from './base.component';
+import { eventBus } from "../utils/event-bus";
+import { SelectorComponent } from "./base.component";
 
 export class SearchComponent extends SelectorComponent {
   private inputElement: HTMLInputElement;
@@ -16,8 +16,11 @@ export class SearchComponent extends SelectorComponent {
    */
   private setupEventListeners(): void {
     // Input events
-    this.inputElement.addEventListener('input', this.handleInput.bind(this));
-    this.inputElement.addEventListener('keydown', this.handleKeyDown.bind(this));
+    this.inputElement.addEventListener("input", this.handleInput.bind(this));
+    this.inputElement.addEventListener(
+      "keydown",
+      this.handleKeyDown.bind(this),
+    );
   }
 
   /**
@@ -25,7 +28,7 @@ export class SearchComponent extends SelectorComponent {
    */
   private handleInput(e: Event): void {
     const query = (e.target as HTMLInputElement).value.trim();
-    
+
     // Clear previous timeout
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
@@ -34,10 +37,10 @@ export class SearchComponent extends SelectorComponent {
     // Debounce search
     this.searchTimeout = window.setTimeout(() => {
       if (query.length >= 2) {
-        eventBus.publish('search:query', { query });
+        eventBus.publish("search:query", { query });
       } else {
         if (query.length === 0) {
-          eventBus.publish('search:clear', {});
+          eventBus.publish("search:clear", {});
         }
       }
     }, 300);
@@ -47,12 +50,12 @@ export class SearchComponent extends SelectorComponent {
    * Handle keyboard navigation
    */
   private handleKeyDown(e: KeyboardEvent): void {
-    switch (e.key) {      
-      case 'Enter': {
+    switch (e.key) {
+      case "Enter": {
         e.preventDefault();
         const query = this.inputElement.value.trim();
         if (query) {
-          eventBus.publish('search:submit', { query });
+          eventBus.publish("search:submit", { query });
         }
         break;
       }
@@ -63,7 +66,7 @@ export class SearchComponent extends SelectorComponent {
    * Clear search
    */
   clear(): void {
-    this.inputElement.value = '';
+    this.inputElement.value = "";
   }
 
   /**

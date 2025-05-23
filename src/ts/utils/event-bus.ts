@@ -1,15 +1,23 @@
-import { AppEvents, EventBusInterface, EventCallback, EventMap } from "../models/event-bus.types";
+import {
+  AppEvents,
+  EventBusInterface,
+  EventCallback,
+  EventMap,
+} from "../models/event-bus.types";
 
-export class EventBus<TEvents extends EventMap = EventMap> implements EventBusInterface<TEvents> {
-  
-  private events: { [key in keyof TEvents]?: Array<EventCallback<TEvents[key]>> } = {};
+export class EventBus<TEvents extends EventMap = EventMap>
+  implements EventBusInterface<TEvents>
+{
+  private events: {
+    [key in keyof TEvents]?: Array<EventCallback<TEvents[key]>>;
+  } = {};
 
   /**
    * Subscribe to an event
    */
   subscribe<K extends keyof TEvents>(
     event: K,
-    callback: EventCallback<TEvents[K]>
+    callback: EventCallback<TEvents[K]>,
   ): () => void {
     if (!this.events[event]) {
       this.events[event] = [];
@@ -23,10 +31,10 @@ export class EventBus<TEvents extends EventMap = EventMap> implements EventBusIn
    */
   unsubscribe<K extends keyof TEvents>(
     event: K,
-    callback: EventCallback<TEvents[K]>
+    callback: EventCallback<TEvents[K]>,
   ): void {
     if (!this.events[event]) return;
-    
+
     const index = this.events[event].indexOf(callback);
     if (index > -1) {
       this.events[event].splice(index, 1);
@@ -36,13 +44,10 @@ export class EventBus<TEvents extends EventMap = EventMap> implements EventBusIn
   /**
    * Publish an event
    */
-  publish<K extends keyof TEvents>(
-    event: K,
-    data: TEvents[K]
-  ): void {
+  publish<K extends keyof TEvents>(event: K, data: TEvents[K]): void {
     if (!this.events[event]) return;
-    
-    this.events[event].forEach(callback => {
+
+    this.events[event].forEach((callback) => {
       try {
         callback(data);
       } catch (error) {

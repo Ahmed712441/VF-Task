@@ -1,7 +1,7 @@
-import { CryptoMarketData } from '../models/crypto.model';
-import { FormatUtils } from '../utils/format';
-import { ChartUtils } from '../utils/chart';
-import { eventBus } from '../utils/event-bus';
+import { CryptoMarketData } from "../models/crypto.model";
+import { FormatUtils } from "../utils/format";
+import { ChartUtils } from "../utils/chart";
+import { eventBus } from "../utils/event-bus";
 
 export class CryptoRowComponent {
   private data: CryptoMarketData;
@@ -17,12 +17,12 @@ export class CryptoRowComponent {
    * Create the table row element
    */
   private createElement(): HTMLTableRowElement {
-    const row = document.createElement('tr');
-    row.className = 'crypto-row';
+    const row = document.createElement("tr");
+    row.className = "crypto-row";
     row.dataset.cryptoId = this.data.id;
-    
+
     row.innerHTML = this.getRowHTML();
-    
+
     return row;
   }
 
@@ -30,10 +30,15 @@ export class CryptoRowComponent {
    * Generate HTML for the row
    */
   private getRowHTML(): string {
-    const priceChangeClass = this.data.price_change_percentage_24h >= 0 ? 'positive' : 'negative';
+    const priceChangeClass =
+      this.data.price_change_percentage_24h >= 0 ? "positive" : "negative";
     const formattedPrice = FormatUtils.formatPrice(this.data.current_price);
-    const formattedChange = FormatUtils.formatPercentage(this.data.price_change_percentage_24h);
-    const miniChart = ChartUtils.createMiniChart(this.data.sparkline_in_7d.price);
+    const formattedChange = FormatUtils.formatPercentage(
+      this.data.price_change_percentage_24h,
+    );
+    const miniChart = ChartUtils.createMiniChart(
+      this.data.sparkline_in_7d.price,
+    );
     // <div class="crypto-symbol">${this.data.symbol.toUpperCase()}</div>
     return `
       <td data-label="Name">
@@ -72,16 +77,16 @@ export class CryptoRowComponent {
    * Attach event listeners
    */
   private attachEventListeners(): void {
-    const removeButton = this.element.querySelector('.remove-button');
+    const removeButton = this.element.querySelector(".remove-button");
     if (removeButton) {
-      removeButton.addEventListener('click', (e) => {
+      removeButton.addEventListener("click", (e) => {
         e.stopPropagation();
         this.handleRemove();
       });
     }
 
     // Optional: Add click handler for the row
-    this.element.addEventListener('click', () => {
+    this.element.addEventListener("click", () => {
       this.handleRowClick();
     });
   }
@@ -90,9 +95,9 @@ export class CryptoRowComponent {
    * Handle remove button click
    */
   private handleRemove(): void {
-    eventBus.publish('crypto:remove', {
+    eventBus.publish("crypto:remove", {
       id: this.data.id,
-      name: this.data.name
+      name: this.data.name,
     });
   }
 
@@ -100,9 +105,9 @@ export class CryptoRowComponent {
    * Handle row click (optional feature)
    */
   private handleRowClick(): void {
-    eventBus.publish('crypto:select', {
+    eventBus.publish("crypto:select", {
       id: this.data.id,
-      data: this.data
+      data: this.data,
     });
   }
 
@@ -112,20 +117,20 @@ export class CryptoRowComponent {
   update(newData: CryptoMarketData): void {
     const hasChanged = this.hasDataChanged(newData);
     this.data = newData;
-    
+
     if (hasChanged) {
       // Add update animation class
-      this.element.classList.add('updating');
-      
+      this.element.classList.add("updating");
+
       // Update the content
       this.element.innerHTML = this.getRowHTML();
-      
+
       // Re-attach event listeners
       this.attachEventListeners();
-      
+
       // Remove animation class after animation completes
       setTimeout(() => {
-        this.element.classList.remove('updating');
+        this.element.classList.remove("updating");
       }, 300);
     }
   }
@@ -136,8 +141,10 @@ export class CryptoRowComponent {
   private hasDataChanged(newData: CryptoMarketData): boolean {
     return (
       this.data.current_price !== newData.current_price ||
-      this.data.price_change_percentage_24h !== newData.price_change_percentage_24h ||
-      JSON.stringify(this.data.sparkline_in_7d) !== JSON.stringify(newData.sparkline_in_7d)
+      this.data.price_change_percentage_24h !==
+        newData.price_change_percentage_24h ||
+      JSON.stringify(this.data.sparkline_in_7d) !==
+        JSON.stringify(newData.sparkline_in_7d)
     );
   }
 
