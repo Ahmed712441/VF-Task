@@ -41,6 +41,7 @@ export class SearchComponent extends SelectorComponent {
         eventBus.publish("search:query", { query });
       } else {
         if (query.length === 0) {
+          this.currentQuery = "";
           eventBus.publish("search:clear", {});
         }
       }

@@ -20,7 +20,6 @@ export class CryptoDashboardApp {
   private isSearchMode: boolean = false;
   private currentChartSubscription: Subscription | null = null;
   private currentTableSubscription: Subscription | null = null;
-  private emptySearchMode: boolean = false;
   private currentSearchQuery: string = "";
 
   constructor(apiKey?: string) {
@@ -149,7 +148,7 @@ export class CryptoDashboardApp {
     if (rerender) {
       this.cryptoListComponent.render(this.currentCryptos);
     } else {
-      this.cryptoListComponent.update(this.currentCryptos, animating);
+      this.cryptoListComponent.update(this.currentCryptos, animating); 
     }
   }
 
@@ -163,14 +162,13 @@ export class CryptoDashboardApp {
       try {
         this.cryptoListComponent.showLoading();
         const currentCryptos = await this.getTopCryptos();
-        this.handleTableUpdate(currentCryptos, this.emptySearchMode, false);
+        this.handleTableUpdate(currentCryptos, false, false);
         this.startRealtimeTableUpdates();
       } catch (error) {
         console.error("Failed to reload top cryptos:", error);
       } finally {
         this.cryptoListComponent.hideLoading();
         this.currentSearchQuery = "";
-        this.emptySearchMode = false;
       }
     }
   }
@@ -193,12 +191,10 @@ export class CryptoDashboardApp {
       this.cryptoListComponent.showLoading();
       const results = await this.getSearchResults(data.query);
       if (results.length > 0) {
-        this.handleTableUpdate(results, this.emptySearchMode, false);
+        this.handleTableUpdate(results, false, false);
         this.startRealtimeTableUpdates();
-        this.emptySearchMode = false;
         this.currentSearchQuery = data.query;
       } else {
-        this.emptySearchMode = true;
         this.cryptoListComponent.showEmpty(
           `No results found for "${data.query}"`,
         );
@@ -208,6 +204,11 @@ export class CryptoDashboardApp {
       this.showErrorState(
         `Failed to search for "${data.query}". Please try again later.`,
       );
+      // reset search query to page initialization
+      setTimeout(() => {
+        this.currentSearchQuery = data.query;
+        eventBus.publish("search:clear", {});
+      }, 30000)
     } finally {
       this.cryptoListComponent.hideLoading();
     }

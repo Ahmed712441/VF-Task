@@ -17,6 +17,7 @@ export class LiveChartComponent extends SelectorComponent {
   private selectedCrypto: LiveChartData | null = null;
   private chartJSLoaded = false;
   private isInitializing = false;
+  private loadingOn : string | null = null;
 
   constructor(canvasSelector: string) {
     super(canvasSelector);
@@ -227,7 +228,9 @@ export class LiveChartComponent extends SelectorComponent {
    */
   private updateChart(crypto: LiveChartData): void {
     setTimeout(() => {
-      this.hideChartLoading();
+      if(this.loadingOn === crypto.data.name) {
+        this.hideChartLoading();
+      }
     }, 1000);
 
     if (!this.chart || !crypto) return;
@@ -325,6 +328,7 @@ export class LiveChartComponent extends SelectorComponent {
    * Show chart loading overlay
    */
   private showChartLoading(cryptoName: string): void {
+    this.loadingOn = cryptoName;
     const container = this.canvas.parentElement;
     const isLoading = container?.querySelector(".chart-loading-overlay");
     if (isLoading) return;
