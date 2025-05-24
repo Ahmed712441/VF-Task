@@ -5,6 +5,10 @@ import { LiveChartComponent } from "./components/live-chart.component";
 import { CryptoMarketData } from "./models/crypto.model";
 import { eventBus } from "./utils/event-bus";
 import { Subscription } from "rxjs";
+import { Retry } from "./utils/decorators";
+
+const NUMBER_OF_SEARCH_QUERIES_RETRIES : number = 5;
+const NUMBER_OF_INITIAL_DATA_LOADING_RETRIES: number = 5;
 
 export class CryptoDashboardApp {
   private cryptoService: CryptoService;
@@ -16,6 +20,8 @@ export class CryptoDashboardApp {
   private isSearchMode: boolean = false;
   private currentChartSubscription: Subscription | null = null;
   private currentTableSubscription: Subscription | null = null;
+  private emptySearchMode: boolean = false;
+  private currentSearchQuery: string = "";
 
   constructor(apiKey?: string) {
     this.cryptoService = new CryptoService(apiKey);
@@ -90,7 +96,7 @@ export class CryptoDashboardApp {
    */
   private async loadInitialData(): Promise<void> {
     try {
-      this.currentCryptos = await this.cryptoService.getTopCryptos(10);
+      this.currentCryptos = await this.getTopCryptos();
       this.cryptoListComponent.render(this.currentCryptos);
     } catch (error) {
       console.error("Failed to load initial data:", error);
@@ -151,18 +157,20 @@ export class CryptoDashboardApp {
    * Handle search clear
    */
   private async handleSearchClear(): Promise<void> {
-    if (this.isSearchMode) {
+    if (this.isSearchMode && this.currentSearchQuery !== "") {
       this.isSearchMode = false;
       // Return to top cryptos
       try {
         this.cryptoListComponent.showLoading();
-        const currentCryptos = await this.cryptoService.getTopCryptos(10);
-        this.handleTableUpdate(currentCryptos, false, false);
+        const currentCryptos = await this.getTopCryptos();
+        this.handleTableUpdate(currentCryptos, this.emptySearchMode, false);
         this.startRealtimeTableUpdates();
       } catch (error) {
         console.error("Failed to reload top cryptos:", error);
       } finally {
         this.cryptoListComponent.hideLoading();
+        this.currentSearchQuery = "";
+        this.emptySearchMode = false;
       }
     }
   }
@@ -171,24 +179,52 @@ export class CryptoDashboardApp {
    * Handle search submit
    */
   private async handleSearchSubmit(data: { query: string }): Promise<void> {
+    if( !data.query || data.query.trim() === "" || data.query.length < 3 || data.query === this.currentSearchQuery) {
+      // Ignore empty or too short queries, or if the query hasn't changed
+      return;
+    }
     try {
       this.isSearchMode = true;
       this.cryptoListComponent.showLoading();
-      const results = await this.cryptoService.getSearchResults(data.query);
+      const results = await this.getSearchResults(data.query);
       if (results.length > 0) {
-        this.handleTableUpdate(results, false, false);
+        this.handleTableUpdate(results, this.emptySearchMode, false);
         this.startRealtimeTableUpdates();
+        this.emptySearchMode = false;
+        this.currentSearchQuery = data.query;
       } else {
+        this.emptySearchMode = true;
         this.cryptoListComponent.showEmpty(
           `No results found for "${data.query}"`,
         );
       }
     } catch (error) {
       console.error("Search submit failed:", error);
-      this.cryptoListComponent.showError("Search failed. Please try again.");
+      this.showErrorState(
+        `Failed to search for "${data.query}". Please try again later.`,
+      );
     } finally {
       this.cryptoListComponent.hideLoading();
     }
+  }
+  
+  @Retry({
+    maxRetries: NUMBER_OF_SEARCH_QUERIES_RETRIES,
+    initialDelay: 700,
+    backoffMultiplier: 2,
+  })
+  private async getSearchResults(query: string): Promise<CryptoMarketData[]> {
+    const results = await this.cryptoService.getSearchResults(query);
+    return results;
+  }
+
+  @Retry({
+    maxRetries: NUMBER_OF_INITIAL_DATA_LOADING_RETRIES,
+    initialDelay: 700,
+    backoffMultiplier: 2,
+  })
+  private async getTopCryptos(): Promise<CryptoMarketData[]> {
+    return await this.cryptoService.getTopCryptos(10)
   }
 
   /**
@@ -227,7 +263,7 @@ export class CryptoDashboardApp {
    * Show error state
    */
   private showErrorState(message: string): void {
-    this.cryptoListComponent.showError(message);
+    this.cryptoListComponent.showError(message,true);
   }
 
   /**

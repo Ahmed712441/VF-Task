@@ -4,6 +4,7 @@
     "module": "ESNext",
     "moduleResolution": "node",
     "esModuleInterop": true,
+    "experimentalDecorators": true,
     "strict": true,
     "sourceMap": true,
     "outDir": "./dist/js",

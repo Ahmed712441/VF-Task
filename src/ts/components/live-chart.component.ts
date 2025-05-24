@@ -169,7 +169,7 @@ export class LiveChartComponent extends SelectorComponent {
               return new Date(context[0].parsed.x).toLocaleString();
             },
             label: function (context: TooltipItem<"line">) {
-              return `${context.dataset.label}: $${context.formattedValue}`;
+              return `${context.dataset.label}: ${FormatUtils.formatTooltipPrice(context.parsed.y)}`;
             },
           },
         },

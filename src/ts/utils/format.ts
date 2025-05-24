@@ -2,12 +2,60 @@ export class FormatUtils {
   /**
    * Format price to USD currency
    */
-  static formatPrice(price: number): string {
+  static formatPrice(price: number,minimumFractionDigits:number=2,maximumFractionDigits:number=6): string {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 6,
+      minimumFractionDigits: minimumFractionDigits,
+      maximumFractionDigits: maximumFractionDigits,
+    }).format(price);
+  }
+
+  static formatTooltipPrice(price: number | null | undefined): string {
+    if (price == null || price <= 0) {
+      return "N/A";
+    }
+
+    let minimumFractionDigits = 8;
+    let maximumFractionDigits = 10;
+
+    // For very large prices (>= $1000)
+    if (price >= 1000) {
+      minimumFractionDigits = 0;
+      maximumFractionDigits = 2;
+    }
+    // For medium prices ($10 - $999.99)
+    else if (price >= 10) {
+      minimumFractionDigits = 2;
+      maximumFractionDigits = 2;
+    }
+    // For prices $1 - $9.99
+    else if (price >= 1) {
+      minimumFractionDigits = 2;
+      maximumFractionDigits = 3;
+    }
+    // For small prices $0.1 - $0.999
+    else if (price >= 0.1) {
+      minimumFractionDigits = 3;
+      maximumFractionDigits = 4;
+    }
+    // For very small prices $0.01 - $0.099
+    else if (price >= 0.01) {
+      minimumFractionDigits = 4;
+      maximumFractionDigits = 6;
+    }
+    // For tiny prices $0.001 - $0.0099
+    else if (price >= 0.001) {
+      minimumFractionDigits = 6;
+      maximumFractionDigits = 8;
+    }
+    // For micro prices < $0.001 - keeps default values
+
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits,
+      maximumFractionDigits,
     }).format(price);
   }
 
@@ -21,36 +69,5 @@ export class FormatUtils {
     }
     const formatted = percentage.toFixed(2);
     return `${percentage >= 0 ? "+" : ""}${formatted}%`;
-  }
-
-  /**
-   * Format market cap or large numbers
-   */
-  static formatMarketCap(value: number): string {
-    if (value >= 1e12) {
-      return `$${(value / 1e12).toFixed(2)}T`;
-    } else if (value >= 1e9) {
-      return `$${(value / 1e9).toFixed(2)}B`;
-    } else if (value >= 1e6) {
-      return `$${(value / 1e6).toFixed(2)}M`;
-    } else if (value >= 1e3) {
-      return `$${(value / 1e3).toFixed(2)}K`;
-    }
-    return `$${value.toFixed(2)}`;
-  }
-
-  /**
-   * Truncate text to specified length
-   */
-  static truncateText(text: string, maxLength: number): string {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + "...";
-  }
-
-  /**
-   * Capitalize first letter
-   */
-  static capitalize(text: string): string {
-    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
   }
 }

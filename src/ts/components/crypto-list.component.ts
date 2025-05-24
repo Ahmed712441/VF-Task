@@ -7,6 +7,7 @@ export class CryptoListComponent extends SelectorComponent {
   private tableBody: HTMLTableSectionElement;
   private cryptoRows: Map<string, CryptoRowComponent> = new Map();
   private isLoading: boolean = false;
+  private isErrored: boolean = false;
 
   constructor(containerSelector: string) {
     super(containerSelector);
@@ -56,6 +57,10 @@ export class CryptoListComponent extends SelectorComponent {
    * Update existing rows with new data
    */
   update(cryptos: CryptoMarketData[], animating: boolean = false): void {
+    if(this.isErrored) {
+      this.render(cryptos);
+      return;
+    }
     const newCryptoRows = new Map<string, CryptoRowComponent>();
     const entriesInOrder = Array.from(this.cryptoRows.values());
     const hasRemovedItems = cryptos.length < entriesInOrder.length;
@@ -126,14 +131,15 @@ export class CryptoListComponent extends SelectorComponent {
   /**
    * Show error state
    */
-  showError(message: string): void {
+  showError(message: string,showReloadBtn:boolean=false): void {
+    this.isErrored = true;
     this.tableBody.innerHTML = `
       <tr class="error-row">
         <td colspan="5" style="text-align: center; padding: 2rem; color: var(--color-danger);">
           <div class="error-message">
             <i class="fas fa-exclamation-triangle"></i>
             <p>${message}</p>
-            <button onclick="location.reload()" class="retry-button">Retry</button>
+            ${showReloadBtn ? '<button onclick="location.reload()" class="retry-button">Reload Page</button>' : ''}
           </div>
         </td>
       </tr>
@@ -164,12 +170,17 @@ export class CryptoListComponent extends SelectorComponent {
     });
   }
 
+  private clearChildren(): void {
+    this.cryptoRows.forEach((row) => row.destroy());
+    this.cryptoRows.clear();
+  }
+
   /**
    * Clear all rows
    */
   clear(): void {
-    this.cryptoRows.forEach((row) => row.destroy());
-    this.cryptoRows.clear();
+    this.isErrored = false;
+    this.clearChildren();
     this.tableBody.innerHTML = "";
   }
 
