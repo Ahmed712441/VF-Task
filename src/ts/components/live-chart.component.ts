@@ -1,43 +1,22 @@
-import {
+// Type imports (these don't add to bundle size)
+import type {
   Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  LineController,
-  Title,
-  TimeScale,
-  Tooltip,
-  Legend,
-  Filler,
   ChartData,
   ChartOptions,
   TooltipItem,
 } from "chart.js";
+
 import { eventBus } from "../utils/event-bus";
 import { LiveChartData } from "../models/live-chart.model";
-import "chartjs-adapter-date-fns";
 import { SelectorComponent } from "./base.component";
 import { FormatUtils } from "../utils/format";
-
-// Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  TimeScale,
-  PointElement,
-  LineElement,
-  LineController,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
-);
 
 export class LiveChartComponent extends SelectorComponent {
   private canvas: HTMLCanvasElement;
   private chart!: ChartJS;
   private selectedCrypto: LiveChartData | null = null;
+  private chartJSLoaded = false;
+  private isInitializing = false;
 
   constructor(canvasSelector: string) {
     super(canvasSelector);
@@ -47,16 +26,77 @@ export class LiveChartComponent extends SelectorComponent {
   }
 
   /**
+   * Lazy load Chart.js and its dependencies
+   */
+  private async loadChartJS(): Promise<typeof ChartJS> {
+    if (this.chartJSLoaded) {
+      // Return the already loaded Chart constructor
+      return (window as any).Chart;
+    }
+
+    try {
+      // Show loading state while Chart.js loads
+      this.showChartLoading("Chart library");
+
+      // Dynamic import of Chart.js and its components
+      const [
+        { Chart: ChartJS },
+        {
+          CategoryScale,
+          LinearScale,
+          PointElement,
+          LineElement,
+          LineController,
+          Title,
+          TimeScale,
+          Tooltip,
+          Legend,
+          Filler,
+        }
+      ] = await Promise.all([
+        import("chart.js"),
+        import("chart.js"),
+        import("chartjs-adapter-date-fns" as any) // Date adapter
+      ]);
+
+      // Register Chart.js components
+      ChartJS.register(
+        CategoryScale,
+        LinearScale,
+        TimeScale,
+        PointElement,
+        LineElement,
+        LineController,
+        Title,
+        Tooltip,
+        Legend,
+        Filler,
+      );
+
+      this.chartJSLoaded = true;
+      console.log("Chart.js loaded successfully");
+      
+      return ChartJS;
+    } catch (error) {
+      console.error("Failed to load Chart.js:", error);
+      this.showChartError();
+      throw error;
+    }
+  }
+
+  /**
    * Initialize Chart.js
    */
-  private initializeChart(): void {
+  private async initializeChart(): Promise<void> {
+    if (this.isInitializing || this.chart) return;
+    this.isInitializing = true;
     try {
+      const ChartJS = await this.loadChartJS();
       this.chart = new ChartJS(this.canvas, {
         type: "line",
         data: this.getInitialData(),
         options: this.getChartOptions(),
       });
-
       console.log("Chart initialized successfully");
     } catch (error) {
       console.error("Failed to initialize chart:", error);
