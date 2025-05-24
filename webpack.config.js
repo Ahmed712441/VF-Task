@@ -31,10 +31,8 @@ envKeys["process.env.NODE_ENV"] = JSON.stringify(
 
 export default (env, argv) => {
   const isDev = argv.mode === 'development';
-  console.log("isDev", isDev);
-  console.log("isDev2", isDev2);
   return {
-    mode: process.env.NODE_ENV || "development",
+    mode: process.env.NODE_ENV || argv.mode || "development",
     entry: ["./src/ts/app.ts", "./src/scss/main.scss"],
     module: {
       rules: [

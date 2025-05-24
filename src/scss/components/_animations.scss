@@ -275,3 +275,7 @@ button:focus,
     border-color: #374151;
   }
 }
+
+.chart-pulse {
+  animation: updatePulse 0.8s ease-in-out;
+}

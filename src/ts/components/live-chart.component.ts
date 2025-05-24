@@ -18,6 +18,7 @@ import { eventBus } from "../utils/event-bus";
 import { LiveChartData } from "../models/live-chart.model";
 import "chartjs-adapter-date-fns";
 import { SelectorComponent } from "./base.component";
+import { FormatUtils } from "../utils/format";
 
 // Register Chart.js components
 ChartJS.register(
@@ -68,7 +69,7 @@ export class LiveChartComponent extends SelectorComponent {
    */
   private setupEventListeners(): void {
     const unsubscribe = eventBus.subscribe("crypto:live-data", (data) => {
-      this.selectCrypto(data);
+      this.updateChart(data);
     });
     this.unsubscribeEvents.push(unsubscribe);
   }
@@ -137,7 +138,10 @@ export class LiveChartComponent extends SelectorComponent {
           },
           ticks: {
             callback: function (value: string | number) {
-              return "$" + value;
+              if (typeof value === "string") {
+                return FormatUtils.formatPrice(parseFloat(value));
+              }
+              return FormatUtils.formatPrice(value);
             },
           },
         },
@@ -170,18 +174,26 @@ export class LiveChartComponent extends SelectorComponent {
   }
 
   /**
-   * Select a cryptocurrency for the chart
-   */
-  selectCrypto(crypto: LiveChartData): void {
-    this.selectedCrypto = crypto;
-    this.updateChart();
-  }
-
-  /**
    * Update chart with current crypto data
    */
-  private updateChart(): void {
-    if (!this.chart || !this.selectedCrypto) return;
+  private updateChart(crypto: LiveChartData): void {
+    if (!this.chart || !crypto) return;
+    
+    if (this.selectedCrypto){
+      const lastTimestamp = this.selectedCrypto.historical_data.prices[
+        this.selectedCrypto.historical_data.prices.length - 1
+      ][0];
+      const currentLastTimestamp =
+        crypto.historical_data.prices[
+          crypto.historical_data.prices.length - 1
+        ][0];
+      if (Math.abs(lastTimestamp - currentLastTimestamp) < 1000) {
+        // Timestamps are within 1 second, skip update
+        return;
+      }
+    }
+    
+    this.selectedCrypto = crypto;
 
     const sparklineData = this.selectedCrypto.historical_data.prices.map(
       ([timestamp, price]) => {
@@ -224,7 +236,15 @@ export class LiveChartComponent extends SelectorComponent {
       ],
     };
 
-    this.chart.update("none"); // No animation for real-time updates
+    this.animateChartUpdate();
+  }
+
+  private animateChartUpdate(): void {
+    this.chart.update('none');
+    this.canvas.classList.add('chart-pulse');
+    setTimeout(() => {
+      this.canvas.classList.remove('chart-pulse');
+    }, 800);
   }
 
   /**
