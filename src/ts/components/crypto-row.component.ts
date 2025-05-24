@@ -149,7 +149,7 @@ export class CryptoRowComponent {
       this.data = newData;
       // Add update animation class
       if (animating) this.element.classList.add("updating");
-
+ 
       // Update the content
       this.element.innerHTML = this.getRowHTML();
 
@@ -160,7 +160,7 @@ export class CryptoRowComponent {
       if(animating){
         setTimeout(() => {
           this.element.classList.remove("updating");
-        }, 300);
+        }, 800);
       }
     }
   }

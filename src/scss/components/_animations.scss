@@ -70,7 +70,7 @@
   transition: $transition-base;
   
   &.updating {
-    animation: updatePulse 1s ease-in-out;
+    animation: updatePulse 0.8s ease-in-out;
   }
   
   &:hover {
