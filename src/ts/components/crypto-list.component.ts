@@ -8,6 +8,7 @@ export class CryptoListComponent extends SelectorComponent {
   private cryptoRows: Map<string, CryptoRowComponent> = new Map();
   private isLoading: boolean = false;
   private isErrored: boolean = false;
+  private isEmpty: boolean = false;
 
   constructor(containerSelector: string) {
     super(containerSelector);
@@ -50,14 +51,18 @@ export class CryptoListComponent extends SelectorComponent {
     this.tableBody.appendChild(fragment);
 
     // Publish render complete event
-    eventBus.publish("cryptoList:rendered", { count: cryptos.length });
+    if (this.isEmpty) {
+      eventBus.publish("cryptoList:re-rendered", { count: cryptos.length });
+    } else {
+      eventBus.publish("cryptoList:rendered", { count: cryptos.length });
+    }
   }
 
   /**
    * Update existing rows with new data
    */
   update(cryptos: CryptoMarketData[], animating: boolean = false): void {
-    if(this.isErrored) {
+    if (this.isErrored) {
       this.render(cryptos);
       return;
     }
@@ -131,7 +136,7 @@ export class CryptoListComponent extends SelectorComponent {
   /**
    * Show error state
    */
-  showError(message: string,showReloadBtn:boolean=false): void {
+  showError(message: string, showReloadBtn: boolean = false): void {
     this.isErrored = true;
     this.tableBody.innerHTML = `
       <tr class="error-row">
@@ -139,7 +144,7 @@ export class CryptoListComponent extends SelectorComponent {
           <div class="error-message">
             <i class="fas fa-exclamation-triangle"></i>
             <p>${message}</p>
-            ${showReloadBtn ? '<button onclick="location.reload()" class="retry-button">Reload Page</button>' : ''}
+            ${showReloadBtn ? '<button onclick="location.reload()" class="retry-button">Reload Page</button>' : ""}
           </div>
         </td>
       </tr>
@@ -150,6 +155,7 @@ export class CryptoListComponent extends SelectorComponent {
    * Show empty state
    */
   showEmpty(message: string = "No cryptocurrencies found"): void {
+    this.isEmpty = true;
     this.tableBody.innerHTML = `
       <tr class="empty-row">
         <td colspan="5" style="text-align: center; padding: 2rem; color: var(--color-text-light);">
@@ -167,6 +173,7 @@ export class CryptoListComponent extends SelectorComponent {
     retryButton?.addEventListener("click", () => {
       this.tableBody.innerHTML = "";
       this.render(cryptoData);
+      this.isEmpty = false;
     });
   }
 

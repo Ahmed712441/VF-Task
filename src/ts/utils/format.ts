@@ -2,7 +2,11 @@ export class FormatUtils {
   /**
    * Format price to USD currency
    */
-  static formatPrice(price: number,minimumFractionDigits:number=2,maximumFractionDigits:number=6): string {
+  static formatPrice(
+    price: number,
+    minimumFractionDigits: number = 2,
+    maximumFractionDigits: number = 6,
+  ): string {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",

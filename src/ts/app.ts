@@ -7,7 +7,7 @@ import { eventBus } from "./utils/event-bus";
 import { Subscription } from "rxjs";
 import { Retry } from "./utils/decorators";
 
-const NUMBER_OF_SEARCH_QUERIES_RETRIES : number = 5;
+const NUMBER_OF_SEARCH_QUERIES_RETRIES: number = 5;
 const NUMBER_OF_INITIAL_DATA_LOADING_RETRIES: number = 5;
 
 export class CryptoDashboardApp {
@@ -179,7 +179,12 @@ export class CryptoDashboardApp {
    * Handle search submit
    */
   private async handleSearchSubmit(data: { query: string }): Promise<void> {
-    if( !data.query || data.query.trim() === "" || data.query.length < 3 || data.query === this.currentSearchQuery) {
+    if (
+      !data.query ||
+      data.query.trim() === "" ||
+      data.query.length < 3 ||
+      data.query === this.currentSearchQuery
+    ) {
       // Ignore empty or too short queries, or if the query hasn't changed
       return;
     }
@@ -207,7 +212,7 @@ export class CryptoDashboardApp {
       this.cryptoListComponent.hideLoading();
     }
   }
-  
+
   @Retry({
     maxRetries: NUMBER_OF_SEARCH_QUERIES_RETRIES,
     initialDelay: 700,
@@ -224,7 +229,7 @@ export class CryptoDashboardApp {
     backoffMultiplier: 2,
   })
   private async getTopCryptos(): Promise<CryptoMarketData[]> {
-    return await this.cryptoService.getTopCryptos(10)
+    return await this.cryptoService.getTopCryptos(10);
   }
 
   /**
@@ -263,7 +268,7 @@ export class CryptoDashboardApp {
    * Show error state
    */
   private showErrorState(message: string): void {
-    this.cryptoListComponent.showError(message,true);
+    this.cryptoListComponent.showError(message, true);
   }
 
   /**
