@@ -74,7 +74,7 @@ export class LiveChartComponent extends SelectorComponent {
     this.subscriptions.push(unsubscribe);
     const unsubscribeSelectItemEvent = eventBus.subscribe(
       "crypto:select", (data) => {
-        if(data && data.id) {
+        if(data && data.id && this.selectedCrypto?.id !== data.id) {
           this.showChartLoading(data.data.name);
         }
       }
@@ -315,9 +315,9 @@ export class LiveChartComponent extends SelectorComponent {
    * Destroy the component
    */
   destroy(): void {
+    super.destroy();
     if (this.chart) {
       this.chart.destroy();
     }
-    super.destroy();
   }
 }

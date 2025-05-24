@@ -14,6 +14,7 @@ export class CryptoRowComponent extends BaseComponent {
     super();
     this.data = data;
     this.element = this.createElement();
+    this.attachSubscribtions();
     this.attachEventListeners();
   }
 
@@ -116,10 +117,13 @@ export class CryptoRowComponent extends BaseComponent {
       });
     }
 
-    // Optional: Add click handler for the row
+    // Add click handler for the row
     this.element.addEventListener("click", () => {
       this.handleRowClick();
     });
+  }
+
+  private attachSubscribtions(): void {
     const selectSubscription = eventBus.subscribe("crypto:select", (data) => {
       this.selected = data.id === this.data.id;
     })
@@ -137,7 +141,7 @@ export class CryptoRowComponent extends BaseComponent {
   }
 
   /**
-   * Handle row click (optional feature)
+   * Handle row click
    */
   private handleRowClick(): void {
     if (this.selected) return ;// Ignore if already selected

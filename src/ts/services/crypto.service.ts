@@ -99,6 +99,7 @@ export class CryptoService {
           const updatedData =
             await this.coinGeckoService.getCryptosByIds(coinIds);
           if (updatedData) {
+            this.currentData = updatedData;
             subscriber.next(updatedData);
           } else {
             // subscriber.error(
@@ -154,5 +155,6 @@ export class CryptoService {
    */
   destroy(): void {
     this.currentData = [];
+    this.coinGeckoService.destroy();
   }
 }

@@ -1,6 +1,6 @@
 # Cryptocurrency Real-time Dashboard
 
-A real-time cryptocurrency tracking application built with TypeScript, displaying a searchable table and line chart with live update.
+A real-time cryptocurrency tracking application built with TypeScript, displaying a searchable table and line chart with live updates.
 
 ## Quick Start
 
@@ -15,8 +15,8 @@ A real-time cryptocurrency tracking application built with TypeScript, displayin
    Create a `.env` file in the root directory: (I left my .env with my API KEY so you can use it)
    ```bash
    APP_COINGECKO_API_KEY=YOUR_API_KEY
-   APP_TABLE_POOLING_FREQUENCY=30 # in seconds
-   APP_LIVE_CHART_POOLING_FREQUENCY_MAX=120 # in seconds
+   APP_TABLE_POOLING_FREQUENCY=10 # in seconds
+   APP_LIVE_CHART_POOLING_FREQUENCY=10 # in seconds
    ```
 
 3. **Run the application:**
@@ -59,7 +59,7 @@ project/
 │   ├── css/              # Compiled CSS
 │   └── index.html        # Copied/processed HTML
 ├── public/               # Static assets
-│   └── img/              # Images
+│   └── images/           # Images
 ├── package.json          # Dependencies and scripts
 ├── tsconfig.json         # TypeScript configuration
 ├── webpack.config.js     # Webpack configuration
@@ -70,27 +70,29 @@ project/
 
 ## Features
 
-- **Real-time Updates**: Live cryptocurrency prices with 30-second (default) polling intervals
-- **Interactive Search**: Client-side filtering of cryptocurrency data
-- **Live Charts**: 24-hour price charts with 5-minute data updates using Chart.js
-- **Responsive Design**: Modern UI with smooth animations for data updates
-- **Efficient Rendering**: Optimized list updates without full re-renders
+- **Real-time Updates**: Displays live cryptocurrency prices, automatically refreshed at configurable polling intervals (default: 30 seconds).
+- **Interactive Search**: Client-side filtering of cryptocurrency data.
+- **Live Charts**: Interactive 24-hour price charts showing data points at 5-minute intervals. The charts auto-update based on a configurable polling interval (default: 30 seconds). Built using Chart.js.
+- **Responsive Design**: Modern UI with smooth animations for data updates.
+- **Efficient Rendering**: Optimized list updates without full re-renders.
 
 ## Architecture Overview
 
 ### Services Layer
-- **HTTP Service**: Fetch API wrapper with error handling
-- **CoinGecko Service**: Direct API integration for with CoinGecko API endpoints
-- **Crypto Service**: Instantiates CoinGecko Service and provide more powerful features like observable streams for real-time updates
+- **HTTP Service**: A wrapper around the Fetch API with enhanced error handling for more reliable network requests.
+- **CoinGecko Service**: A dedicated integration layer for accessing CoinGecko API endpoints.
+- **Crypto Service**: Builds on top of the CoinGecko Service to offer advanced features like observable streams for real-time .cryptocurrency updates, and also decoubles the app logic from being tied to certain 3rd party (e.g., CoinGecko).
 
 ### Components
-- **Search Component**: Cryptocurrency filtering interface
-- **Crypto List**: Efficient list management with animated updates
-- **Crypto Row**: Individual cryptocurrency entry in the Crypto List component display with 7d mini-charts
-- **Live Chart**: Interactive 24-hour price visualization for the selected crypto coint
+- **Crypto List**: Renders and manages a dynamic list of cryptocurrencies with smooth animated updates for price changes.
+- **Crypto Row**: Individual cryptocurrency entry in the Crypto List component, displaying key data along with a 7-day mini-chart
+- **Live Chart**: Interactive 24-hour price chart for the selected cryptocurrency, providing real-time visualization.
+- **Search Component**: Component which takes the search input from the user.
 
 ### Communication
 Components communicate via a custom event bus using publish/subscribe pattern, ensuring loose coupling and maintainable code.
+
+> Note: All published events can be found in `AppEvents Interface` in `src/ts/models/event-bus.types.ts`.
 
 ## Key Implementation Decisions
 
@@ -98,4 +100,4 @@ Components communicate via a custom event bus using publish/subscribe pattern, e
 
 **Search Implementation**: CoinGecko's market API endpoint doesn't support partial search functionality - only exact matches by ID, name, or category are supported. To enable proper search functionality, the full coin list is fetched and cached client-side for 30 minutes, allowing real-time filtering before API calls. [Reference: CoinGecko Coins List API](https://docs.coingecko.com/v3.0.1/reference/coins-list)
 
-**Live Chart Data**: Uses CoinGecko's market_chart endpoint for maximum data frequency (5-minute intervals with 24-hour timeframe). This approach was chosen over the 7-day chart data used in table rows, which only updates hourly, to provide the highest resolution real-time visualization. [Reference: CoinGecko Market Chart API](https://docs.coingecko.com/v3.0.1/reference/coins-id-market-chart)
+**Live Chart Data**: Used CoinGecko's market_chart endpoint for maximum data frequency (5-minute intervals with 24-hour timeframe). This approach was chosen over the 7-day chart data used in table rows, which only updates hourly, to provide the highest resolution real-time visualization. [Reference: CoinGecko Market Chart API](https://docs.coingecko.com/v3.0.1/reference/coins-id-market-chart)

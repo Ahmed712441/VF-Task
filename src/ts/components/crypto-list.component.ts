@@ -105,24 +105,6 @@ export class CryptoListComponent extends SelectorComponent {
   }
 
   /**
-   * Filter displayed cryptocurrencies
-   */
-  filter(searchTerm: string): void {
-    const term = searchTerm.toLowerCase().trim();
-
-    this.cryptoRows.forEach((rowComponent) => {
-      const crypto = rowComponent.getData();
-      const matches =
-        crypto.name.toLowerCase().includes(term) ||
-        crypto.symbol.toLowerCase().includes(term) ||
-        crypto.id.toLowerCase().includes(term);
-
-      const element = rowComponent.getElement();
-      element.style.display = matches || term === "" ? "" : "none";
-    });
-  }
-
-  /**
    * Show loading state
    */
   showLoading(): void {
@@ -209,7 +191,8 @@ export class CryptoListComponent extends SelectorComponent {
    * Destroy the component
    */
   destroy(): void {
-    this.clear();
     super.destroy();
+    this.clear();
+    this.container.remove();
   }
 }

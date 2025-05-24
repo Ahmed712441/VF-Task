@@ -23,10 +23,6 @@ export class CoinGeckoService {
       return config;
     });
 
-    // Add response interceptor for error handling
-    this.http.addResponseInterceptor((response) => {
-      return response;
-    });
   }
 
   /**
@@ -233,5 +229,9 @@ export class CoinGeckoService {
       expiresIn: Math.max(0, this.cacheExpiry - Date.now()),
       coinsCount: this.coinsListCache?.length || 0,
     };
+  }
+
+  destroy(): void {
+    this.clearCache();
   }
 }

@@ -89,8 +89,10 @@ export class SearchComponent extends SelectorComponent {
    * Destroy the component
    */
   destroy(): void {
+    super.destroy();
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
     }
+    this.inputElement.remove();
   }
 }
