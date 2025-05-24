@@ -63,12 +63,11 @@ export class CryptoListComponent extends SelectorComponent {
    */
   update(cryptos: CryptoMarketData[], animating: boolean = false): void {
     // animating means real-time updates
-    if ( (this.isErrored||this.isEmpty) && !animating) {
+    if ((this.isErrored || this.isEmpty) && !animating) {
       this.render(cryptos);
       return;
-    }
-    else if (this.isErrored || this.isEmpty) return;
-    
+    } else if (this.isErrored || this.isEmpty) return;
+
     const newCryptoRows = new Map<string, CryptoRowComponent>();
     const entriesInOrder = Array.from(this.cryptoRows.values());
     const hasRemovedItems = cryptos.length < entriesInOrder.length;

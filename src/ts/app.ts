@@ -148,7 +148,7 @@ export class CryptoDashboardApp {
     if (rerender) {
       this.cryptoListComponent.render(this.currentCryptos);
     } else {
-      this.cryptoListComponent.update(this.currentCryptos, animating); 
+      this.cryptoListComponent.update(this.currentCryptos, animating);
     }
   }
 
@@ -208,7 +208,7 @@ export class CryptoDashboardApp {
       setTimeout(() => {
         this.currentSearchQuery = data.query;
         eventBus.publish("search:clear", {});
-      }, 30000)
+      }, 30000);
     } finally {
       this.cryptoListComponent.hideLoading();
     }

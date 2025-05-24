@@ -17,7 +17,7 @@ export class LiveChartComponent extends SelectorComponent {
   private selectedCrypto: LiveChartData | null = null;
   private chartJSLoaded = false;
   private isInitializing = false;
-  private loadingOn : string | null = null;
+  private loadingOn: string | null = null;
 
   constructor(canvasSelector: string) {
     super(canvasSelector);
@@ -53,11 +53,11 @@ export class LiveChartComponent extends SelectorComponent {
           Tooltip,
           Legend,
           Filler,
-        }
+        },
       ] = await Promise.all([
         import("chart.js"),
         import("chart.js"),
-        import("chartjs-adapter-date-fns" as any) // Date adapter
+        import("chartjs-adapter-date-fns" as any), // Date adapter
       ]);
 
       // Register Chart.js components
@@ -76,7 +76,7 @@ export class LiveChartComponent extends SelectorComponent {
 
       this.chartJSLoaded = true;
       console.log("Chart.js loaded successfully");
-      
+
       return ChartJS;
     } catch (error) {
       console.error("Failed to load Chart.js:", error);
@@ -228,14 +228,14 @@ export class LiveChartComponent extends SelectorComponent {
    */
   private updateChart(crypto: LiveChartData): void {
     setTimeout(() => {
-      if(this.loadingOn === crypto.data.name) {
+      if (this.loadingOn === crypto.data.name) {
         this.hideChartLoading();
       }
     }, 1000);
 
     if (!this.chart || !crypto) return;
 
-    if (this.selectedCrypto) {
+    if (this.selectedCrypto && this.selectedCrypto.id === crypto.id) {
       const lastTimestamp =
         this.selectedCrypto.historical_data.prices[
           this.selectedCrypto.historical_data.prices.length - 1
