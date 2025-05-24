@@ -8,7 +8,6 @@ export abstract class BaseComponent {
 }
 
 export abstract class SelectorComponent extends BaseComponent {
-
   protected container: HTMLElement;
 
   constructor(containerSelector: string) {
@@ -19,5 +18,4 @@ export abstract class SelectorComponent extends BaseComponent {
     }
     this.container = container as HTMLElement;
   }
-
 }

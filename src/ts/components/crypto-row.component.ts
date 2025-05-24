@@ -126,7 +126,7 @@ export class CryptoRowComponent extends BaseComponent {
   private attachSubscribtions(): void {
     const selectSubscription = eventBus.subscribe("crypto:select", (data) => {
       this.selected = data.id === this.data.id;
-    })
+    });
     this.subscriptions.push(selectSubscription);
   }
 
@@ -144,7 +144,7 @@ export class CryptoRowComponent extends BaseComponent {
    * Handle row click
    */
   private handleRowClick(): void {
-    if (this.selected) return ;// Ignore if already selected
+    if (this.selected) return; // Ignore if already selected
     eventBus.publish("crypto:select", {
       id: this.data.id,
       data: this.data,
@@ -154,14 +154,14 @@ export class CryptoRowComponent extends BaseComponent {
   /**
    * Update the row with new data
    */
-  update(newData: CryptoMarketData,animating:boolean = false): void {
+  update(newData: CryptoMarketData, animating: boolean = false): void {
     const hasChanged = this.hasDataChanged(newData);
 
     if (hasChanged) {
       this.data = newData;
       // Add update animation class
       if (animating) this.element.classList.add("updating");
- 
+
       // Update the content
       this.element.innerHTML = this.getRowHTML();
 
@@ -169,7 +169,7 @@ export class CryptoRowComponent extends BaseComponent {
       this.attachEventListeners();
 
       // Remove animation class after animation completes
-      if(animating){
+      if (animating) {
         setTimeout(() => {
           this.element.classList.remove("updating");
         }, 800);

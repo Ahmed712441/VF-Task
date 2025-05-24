@@ -73,11 +73,12 @@ export class LiveChartComponent extends SelectorComponent {
     });
     this.subscriptions.push(unsubscribe);
     const unsubscribeSelectItemEvent = eventBus.subscribe(
-      "crypto:select", (data) => {
-        if(data && data.id && this.selectedCrypto?.id !== data.id) {
+      "crypto:select",
+      (data) => {
+        if (data && data.id && this.selectedCrypto?.id !== data.id) {
           this.showChartLoading(data.data.name);
         }
-      }
+      },
     );
     this.subscriptions.push(unsubscribeSelectItemEvent);
   }
@@ -185,17 +186,17 @@ export class LiveChartComponent extends SelectorComponent {
    * Update chart with current crypto data
    */
   private updateChart(crypto: LiveChartData): void {
-    
     setTimeout(() => {
-      this.hideChartLoading()
-    },1000);
+      this.hideChartLoading();
+    }, 1000);
 
     if (!this.chart || !crypto) return;
-    
-    if (this.selectedCrypto){
-      const lastTimestamp = this.selectedCrypto.historical_data.prices[
-        this.selectedCrypto.historical_data.prices.length - 1
-      ][0];
+
+    if (this.selectedCrypto) {
+      const lastTimestamp =
+        this.selectedCrypto.historical_data.prices[
+          this.selectedCrypto.historical_data.prices.length - 1
+        ][0];
       const currentLastTimestamp =
         crypto.historical_data.prices[
           crypto.historical_data.prices.length - 1
@@ -205,7 +206,7 @@ export class LiveChartComponent extends SelectorComponent {
         return;
       }
     }
-    
+
     this.selectedCrypto = crypto;
 
     const sparklineData = this.selectedCrypto.historical_data.prices.map(
@@ -253,10 +254,10 @@ export class LiveChartComponent extends SelectorComponent {
   }
 
   private animateChartUpdate(): void {
-    this.chart.update('none');
-    this.canvas.classList.add('chart-pulse');
+    this.chart.update("none");
+    this.canvas.classList.add("chart-pulse");
     setTimeout(() => {
-      this.canvas.classList.remove('chart-pulse');
+      this.canvas.classList.remove("chart-pulse");
     }, 800);
   }
 
@@ -283,12 +284,10 @@ export class LiveChartComponent extends SelectorComponent {
   /**
    * Show chart loading overlay
    */
-  private showChartLoading(
-    cryptoName: string
-  ): void {
+  private showChartLoading(cryptoName: string): void {
     const container = this.canvas.parentElement;
     const isLoading = container?.querySelector(".chart-loading-overlay");
-    if(isLoading) return;
+    if (isLoading) return;
 
     const loadingDiv = document.createElement("div");
     loadingDiv.className = "chart-loading-overlay";
@@ -297,7 +296,7 @@ export class LiveChartComponent extends SelectorComponent {
                 <div class="chart-loading-spinner" style="font-size: 2rem; margin-bottom: 1rem;">⏳</div>
                 <p>Loading Livechart data for ${cryptoName}...</p>
               </div>`;
-    
+
     container?.appendChild(loadingDiv);
   }
 
@@ -305,7 +304,9 @@ export class LiveChartComponent extends SelectorComponent {
    * hide chart loading overlay
    */
   private hideChartLoading(): void {
-    const loadingDiv = this.canvas.parentElement?.querySelector(".chart-loading-overlay");
+    const loadingDiv = this.canvas.parentElement?.querySelector(
+      ".chart-loading-overlay",
+    );
     if (loadingDiv) {
       loadingDiv.remove();
     }

@@ -55,14 +55,14 @@ export class CryptoListComponent extends SelectorComponent {
   /**
    * Update existing rows with new data
    */
-  update(cryptos: CryptoMarketData[],animating:boolean=false): void {
+  update(cryptos: CryptoMarketData[], animating: boolean = false): void {
     const newCryptoRows = new Map<string, CryptoRowComponent>();
     const entriesInOrder = Array.from(this.cryptoRows.values());
     const hasRemovedItems = cryptos.length < entriesInOrder.length;
     const hasAddedItems = cryptos.length > entriesInOrder.length;
     const minLength = Math.min(cryptos.length, entriesInOrder.length);
     for (let i = 0; i < minLength; i++) {
-      entriesInOrder[i].update(cryptos[i],animating);
+      entriesInOrder[i].update(cryptos[i], animating);
       newCryptoRows.set(cryptos[i].id, entriesInOrder[i]);
     }
     if (hasRemovedItems) {

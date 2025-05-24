@@ -22,7 +22,6 @@ export class CoinGeckoService {
       );
       return config;
     });
-
   }
 
   /**
