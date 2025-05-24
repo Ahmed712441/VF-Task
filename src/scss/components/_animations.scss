@@ -279,3 +279,7 @@ button:focus,
 .chart-pulse {
   animation: updatePulse 0.8s ease-in-out;
 }
+
+.chart-loading-spinner {
+  animation: spin 1.2s ease-in-out infinite;
+}

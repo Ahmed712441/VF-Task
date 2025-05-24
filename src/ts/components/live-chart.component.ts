@@ -71,7 +71,15 @@ export class LiveChartComponent extends SelectorComponent {
     const unsubscribe = eventBus.subscribe("crypto:live-data", (data) => {
       this.updateChart(data);
     });
-    this.unsubscribeEvents.push(unsubscribe);
+    this.subscriptions.push(unsubscribe);
+    const unsubscribeSelectItemEvent = eventBus.subscribe(
+      "crypto:select", (data) => {
+        if(data && data.id) {
+          this.showChartLoading(data.data.name);
+        }
+      }
+    );
+    this.subscriptions.push(unsubscribeSelectItemEvent);
   }
 
   /**
@@ -177,6 +185,11 @@ export class LiveChartComponent extends SelectorComponent {
    * Update chart with current crypto data
    */
   private updateChart(crypto: LiveChartData): void {
+    
+    setTimeout(() => {
+      this.hideChartLoading()
+    },1000);
+
     if (!this.chart || !crypto) return;
     
     if (this.selectedCrypto){
@@ -264,6 +277,37 @@ export class LiveChartComponent extends SelectorComponent {
           </div>
         </div>
       `;
+    }
+  }
+
+  /**
+   * Show chart loading overlay
+   */
+  private showChartLoading(
+    cryptoName: string
+  ): void {
+    const container = this.canvas.parentElement;
+    const isLoading = container?.querySelector(".chart-loading-overlay");
+    if(isLoading) return;
+
+    const loadingDiv = document.createElement("div");
+    loadingDiv.className = "chart-loading-overlay";
+    loadingDiv.style.display = "flex";
+    loadingDiv.innerHTML = `<div style="text-align: center;">
+                <div class="chart-loading-spinner" style="font-size: 2rem; margin-bottom: 1rem;">⏳</div>
+                <p>Loading Livechart data for ${cryptoName}...</p>
+              </div>`;
+    
+    container?.appendChild(loadingDiv);
+  }
+
+  /**
+   * hide chart loading overlay
+   */
+  private hideChartLoading(): void {
+    const loadingDiv = this.canvas.parentElement?.querySelector(".chart-loading-overlay");
+    if (loadingDiv) {
+      loadingDiv.remove();
     }
   }
 

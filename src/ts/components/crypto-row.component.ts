@@ -2,13 +2,16 @@ import { CryptoMarketData } from "../models/crypto.model";
 import { FormatUtils } from "../utils/format";
 import { ChartUtils } from "../utils/chart";
 import { eventBus } from "../utils/event-bus";
+import { BaseComponent } from "./base.component";
 
-export class CryptoRowComponent {
+export class CryptoRowComponent extends BaseComponent {
   private data: CryptoMarketData;
   private element: HTMLTableRowElement;
   private isloading: boolean = false;
+  private selected: boolean = false;
 
   constructor(data: CryptoMarketData) {
+    super();
     this.data = data;
     this.element = this.createElement();
     this.attachEventListeners();
@@ -117,6 +120,10 @@ export class CryptoRowComponent {
     this.element.addEventListener("click", () => {
       this.handleRowClick();
     });
+    const selectSubscription = eventBus.subscribe("crypto:select", (data) => {
+      this.selected = data.id === this.data.id;
+    })
+    this.subscriptions.push(selectSubscription);
   }
 
   /**
@@ -133,6 +140,7 @@ export class CryptoRowComponent {
    * Handle row click (optional feature)
    */
   private handleRowClick(): void {
+    if (this.selected) return ;// Ignore if already selected
     eventBus.publish("crypto:select", {
       id: this.data.id,
       data: this.data,
@@ -209,6 +217,7 @@ export class CryptoRowComponent {
    * Destroy the component
    */
   destroy(): void {
+    super.destroy();
     this.element.remove();
   }
 }

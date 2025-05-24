@@ -29,7 +29,7 @@ export class CryptoListComponent extends SelectorComponent {
       "crypto:remove",
       this.removeCrypto.bind(this),
     );
-    this.unsubscribeEvents.push(unsubscribe);
+    this.subscriptions.push(unsubscribe);
   }
 
   /**
